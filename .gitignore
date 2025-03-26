@@ -1,0 +1,97 @@
+##### configuration copied from https://gist.github.com/octocat/9257657 ###
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases (added as needed) #
+######################
+*.log
+*.sql
+*.sqlite
+*.png
+*.csv
+*.xlsx
+*.nc
+*.txt
+*.json 
+*.xml
+*.npy
+*.err
+*.out
+# *.pdf
+*.dat
+*.mat
+*.mathcha
+log_p.ini
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+# End of ##### configuration copied from https://gist.github.com/octocat/9257657 ###
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+
+# Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode
+
+### VisualStudioCode ###
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
+.ionide
+
+# End of https://www.toptal.com/developers/gitignore/api/visualstudiocode
+
+#### don't ignore these exceptional files/folders ####
+!site_year_list.csv
+!SiteInfo_BRKsite_list.csv
+!model_settings.xlsx
+!f01.png
+!mit_license_logo.png
+
+#### ignore the following exceptional files/folder ####
+*_send_slurm_job.sh
+# /prof
+# /c_code
