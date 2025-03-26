@@ -326,7 +326,8 @@ def optimize_model(
     # get an array of unique years in a site
     unique_years_arr = np.unique(ip_df_dict["year"])
 
-    # add extra parameters which will vary for each year
+    # add extra parameters which will vary for each year, while other params remain
+    # constant for all years
     param_dict, p_names_to_vary, yr_specific_p_names = add_keys_for_group(
         settings_dict["param_group_to_vary"],
         params,

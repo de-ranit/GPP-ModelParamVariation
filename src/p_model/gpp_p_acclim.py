@@ -109,6 +109,8 @@ def gpp_p_acclim(
     nstepsday (int): number of timesteps in a day
     params (dict): dictionary with parameter values
     co2_var_name (str): name of co2 variable
+    param_group_to_vary (str): parameter group to be optimized per year, while other
+                               parameters are kept constant across years in a site
 
     returns:
     o_a (dict): dictionary with PModel output with acclimation

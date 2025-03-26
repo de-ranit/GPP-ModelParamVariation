@@ -132,6 +132,10 @@ def run_p_model(
     time_info (dict): dictionary with time info
     fpar_var_name (str): name of fpar variable
     co2_var_name (str): name of co2 variable
+    param_group_to_vary (str): parameter group to be optimized per year, while other
+                                parameters are kept constant across years in a site 
+    param_names_to_vary (list): list of parameter names to be optimized per year, while other
+                                parameters are kept constant across years in a site
 
     returns:
     p_model_acclim_fw_op (dict): dictionary with PModel output with acclimation

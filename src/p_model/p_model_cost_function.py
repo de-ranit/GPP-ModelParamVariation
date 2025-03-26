@@ -396,16 +396,6 @@ def cost_nrmse(obs, sim, normalize_model=2, unc=None):
 
 
 def calc_cum(df, var_name):
-    # df["cumulative_sum"] = df.groupby("year")[var_name].cumsum()
-
-    # df["cumulative_count"] = df.groupby("year").cumcount() + 1
-
-    # # Calculate the cumulative average
-    # df["cumulative_average"] = df["cumulative_sum"] / df["cumulative_count"]
-
-    # # Get the cumulative average as a numpy array
-    # cumulative_average = df["cumulative_average"].to_numpy()
-
     return df.groupby("year")[var_name].cumsum().to_numpy()  # cumulative_average
 
 
@@ -518,6 +508,10 @@ def p_model_cost_function(
     site_year (float): year of data to be used for optimization
                        (only used when optimizing each year separately)
     consider_yearly_cost (bool): whether to consider an additional constraint on IAV of GPP
+    param_group_to_vary (str): parameter group to be optimized per year, while other 
+                                parameters are kept constant across years in a site
+    param_names_to_vary (list): list of parameter names to be optimized per year, while other
+                                parameters are kept constant across years in a site
 
     Returns:
     cost (float): cost function value
@@ -625,8 +619,8 @@ def p_model_cost_function(
                 et_obs_yr_cum_avg,
                 et_sim_yr_cum_avg,
                 et_unc_yr_cum_avg,
-                gpp_yr_arr,
-                et_yr_arr,
+                _,
+                _,
             ) = calc_yearwise_cum(
                 gpp_obs,
                 gpp_sim,
@@ -638,13 +632,6 @@ def p_model_cost_function(
                 drop_et_data_indices,
                 ip_df_dict["year"],
             )
-
-            # gpp_cost_yr = calc_mean_yearwise_cost(
-            #     gpp_obs_yr_cum_avg, gpp_sim_yr_cum_avg, nee_unc_yr_cum_avg, gpp_yr_arr
-            # )
-            # et_cost_yr = calc_mean_yearwise_cost(
-            #     et_obs_yr_cum_avg, et_sim_yr_cum_avg, et_unc_yr_cum_avg, et_yr_arr
-            # )
 
             gpp_yr_nnse = cost_nnse(
                 gpp_obs_yr_cum_avg,

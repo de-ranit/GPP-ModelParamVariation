@@ -448,6 +448,9 @@ def main_script_forward(idx, site_list, settings_dict):
 
 ################################################################################
 def main():
+    """
+    Mian script for model parameter optimization and forward runs
+    """
     # read the model settings from json file
     # with open(ROOT_PATH / "p_model_settings.json", "r", encoding="utf-8") as json_file:
     #     model_settings = json.load(json_file)
@@ -688,27 +691,25 @@ def main():
             and (model_settings["opti_type"] != "per_pft")
             and (model_settings["opti_type"] != "global_opti")
         ):
-            # if isinstance(model_settings["site_list"], str):
-            #     # get the list of sites of interest
-            #     sites_to_use = model_settings["site_list"].split(", ")
-            #     # optimize sequentially for each site/ site year
-            #     for s in sites_to_use:
-            #         # testing the code with single site/
-            #         # use a for loop for sequential model optimization
-            #         site_idx_ = site_id_list.index(
-            #             s
-            #         )  # give the site name or site name_site year here
-            #         print("running for site/ site year: ", site_id_list[site_idx_])
-            #         main_script_optimize(site_idx_, site_id_list, model_settings)
-            site_idx_ = int(sys.argv[1]) - 1
-            main_script_optimize(site_idx_, site_id_list, model_settings)
-            # else:
-            #     raise ValueError(
-            #         (
-            #             "It is mandatory to fill the `site_list` field in"
-            #             "the model_settings.xlsx file when `eval_mode` is `sequence`"
-            #         )
-            #     )
+            if isinstance(model_settings["site_list"], str):
+                # get the list of sites of interest
+                sites_to_use = model_settings["site_list"].split(", ")
+                # optimize sequentially for each site/ site year
+                for s in sites_to_use:
+                    # testing the code with single site/
+                    # use a for loop for sequential model optimization
+                    site_idx_ = site_id_list.index(
+                        s
+                    )  # give the site name or site name_site year here
+                    print("running for site/ site year: ", site_id_list[site_idx_])
+                    main_script_optimize(site_idx_, site_id_list, model_settings)
+            else:
+                raise ValueError(
+                    (
+                        "It is mandatory to fill the `site_list` field in"
+                        "the model_settings.xlsx file when `eval_mode` is `sequence`"
+                    )
+                )
         else:
             raise ValueError(
                 "eval_mode must be one of: parallel, sequence, when run_mode is optim"

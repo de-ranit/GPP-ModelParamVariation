@@ -45,6 +45,10 @@ def run_lue_model(
     nstepsday (int): number of sub-daily timesteps in a day
     fpar_var_name (str): name of fAPAR variable
     co2_var_name (str): name of CO2 variable
+    param_group_to_vary (str): parameter group to be optimized per year, while other
+                                parameters are kept constant across years in a site
+    param_names_to_vary (list): list of parameter names to be optimized per year, while other
+                                parameters are kept constant across years in a site
 
     Returns:
     lue_model_op (dict): dictionary with LUE model output
@@ -193,11 +197,6 @@ def run_lue_model(
         sw_in=ip_df_dict["SW_IN_GF"],
         sw_in_pot=ip_df_dict["SW_IN_POT_ONEFlux"],
     )
-
-    # # calculate GPP
-    # gpp_lue = (
-    #     updated_params["LUE_max"] * f_tair * f_vpd_co2 * f_water * f_light * f_cloud
-    # ) * (ip_df_dict["PPFD_IN_GF"] * ip_df_dict[fpar_var_name])
 
     # re-calculating GPP using the sensitivity functions for which
     # the parameters are varying per year
