@@ -1,6 +1,6 @@
 # Inter–annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production
 <p align="center">
-  <img src=https://raw.githubusercontent.com/de-ranit/GPP-ModelParamVariation/refs/heads/main/prep_figs/figures/f01.png alt="workflow" width="600">
+  <img src=https://raw.githubusercontent.com/de-ranit/GPP-ModelParamVariation/refs/heads/main/prep_figs/figures/f01_workflow.png alt="workflow" width="600">
 </p>
 
 <p align="center">
