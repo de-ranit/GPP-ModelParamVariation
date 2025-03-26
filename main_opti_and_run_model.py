@@ -29,11 +29,8 @@ sys.path.append(str(ROOT_PATH / "src"))  # type: ignore # Add path for other sci
 from src.common.get_data import get_data  # pylint: disable=C0413
 from src.common.opti_per_site_or_site_year import optimize_model  # pylint: disable=C0413
 from src.common.opti_per_site_or_site_year import get_cmaes_options  # pylint: disable=C0413
-from src.common.opti_per_pft import opti_per_pft  # pylint: disable=C0413
-from src.common.opti_global import opti_global  # pylint: disable=C0413
 from src.common.forward_run_model import forward_run_model  # pylint: disable=C0413
 from src.common.forward_run_model import save_n_plot_model_results # pylint: disable=C0413
-from src.common.forward_run_site_year_opti import forward_run_site_year_opti # pylint: disable=C0413
 from src.postprocess.plot_exp_result import plot_exp_result # pylint: disable=C0413
 # fmt: on
 
@@ -142,116 +139,51 @@ def main_script_optimize(idx, site_list, settings_dict):
         site_name, settings_dict
     )
 
-    # optimize model for each site/ site year
-    if settings_dict["opti_type"] == "all_year":
-        ###########################################################################################
-        # In case job was failed/ cancelled in middle, then don't optimize all the sites
-        # during restart. Only optimize the remaining sites/ incomplete sites
-        ###########################################################################################
-        # check if the optimization results already exists for a certain site
-        opti_dict_path = Path(
-            "opti_results",
-            settings_dict["model_name"],
-            settings_dict["exp_name"],
-            "opti_dicts",
-        )  # Path where optimization results were saved
-        opti_dict_path_filename = os.path.join(
-            opti_dict_path, f"{ip_df_dict['SiteID']}_opti_dict.json"
+    # optimize model for each site
+    ###########################################################################################
+    # In case job was failed/ cancelled in middle, then don't optimize all the sites
+    # during restart. Only optimize the remaining sites/ incomplete sites
+    ###########################################################################################
+    # check if the optimization results already exists for a certain site
+    opti_dict_path = Path(
+        "opti_results",
+        settings_dict["model_name"],
+        settings_dict["exp_name"],
+        "opti_dicts",
+    )  # Path where optimization results were saved
+    opti_dict_path_filename = os.path.join(
+        opti_dict_path, f"{ip_df_dict['SiteID']}_opti_dict.json"
+    )
+    if os.path.exists(opti_dict_path_filename):  # if optimization results already exist
+        logger.info(
+            "%s : Optimization already done",
+            ip_df_dict["SiteID"],
         )
-        if os.path.exists(
-            opti_dict_path_filename
-        ):  # if optimization results already exist
-            logger.info(
-                "%s : Optimization already done",
-                ip_df_dict["SiteID"],
-            )
-        else:
-            # check if the CMAES output file exists for a certain site,
-            # but optimization was incomplete (as optimization results file does not exist)
-            outcmaes_path = Path(
-                "outcmaes", settings_dict["model_name"], settings_dict["exp_name"]
-            )
-            outcmaes_filename = glob.glob(
-                os.path.join(outcmaes_path, f"{ip_df_dict['SiteID']}_*.dat")
-            )
-
-            # remove incomplete CMAES output files if they exist
-            if len(outcmaes_filename) > 0:
-                for filename in outcmaes_filename:
-                    logger.info(
-                        "%s : Deleting incomplete CMAES output file: %s",
-                        ip_df_dict["SiteID"],
-                        filename,
-                    )
-                    os.remove(filename)
-            ##################################################################
-
-            # perform site optimization
-            optimize_model(
-                ip_df_dict, ip_df_daily_wai, wai_output, time_info, settings_dict
-            )
-
-    elif settings_dict["opti_type"] == "site_year":
-        site_name_year = site_list[idx]
-        site_year = float(site_name_year.split("_")[1])  # get the site year
-
-        ###########################################################################################
-        # In case job was failed/ cancelled in middle, then don't optimize all the site years
-        # during restart. Only optimize the remaining site years/ incomplete site years
-        ###########################################################################################
-        # check if the optimization results already exists for a certain site year
-        opti_dict_path = Path(
-            "opti_results",
-            settings_dict["model_name"],
-            settings_dict["exp_name"],
-            "opti_dicts",
-        )  # Path where optimization results were saved
-        opti_dict_path_filename = os.path.join(
-            opti_dict_path, f"{ip_df_dict['SiteID']}_{int(site_year)}_opti_dict.json"
-        )
-        if os.path.exists(
-            opti_dict_path_filename
-        ):  # if optimization results already exist
-            logger.info(
-                "%s (%s) : Optimization already done",
-                ip_df_dict["SiteID"],
-                str(int(site_year)),
-            )
-        else:
-            # check if the CMAES output file exists for a certain site year,
-            # but optimization was incomplete (as optimization results file does not exist)
-            outcmaes_path = Path(
-                "outcmaes", settings_dict["model_name"], settings_dict["exp_name"]
-            )
-            outcmaes_filename = glob.glob(
-                os.path.join(
-                    outcmaes_path, f"{ip_df_dict['SiteID']}_{int(site_year)}_*.dat"
-                )
-            )
-
-            # remove incomplete CMAES output files if they exist
-            if len(outcmaes_filename) > 0:
-                for filename in outcmaes_filename:
-                    logger.info(
-                        "%s (%s) : Deleting incomplete CMAES output file: %s",
-                        ip_df_dict["SiteID"],
-                        str(int(site_year)),
-                        filename,
-                    )
-                    os.remove(filename)
-            ##################################################################
-
-            # perform site year optimization
-            optimize_model(
-                ip_df_dict,
-                ip_df_daily_wai,
-                wai_output,
-                time_info,
-                settings_dict,
-                site_year,
-            )
     else:
-        raise ValueError("opti_type must be one of: all_year, site_year")
+        # check if the CMAES output file exists for a certain site,
+        # but optimization was incomplete (as optimization results file does not exist)
+        outcmaes_path = Path(
+            "outcmaes", settings_dict["model_name"], settings_dict["exp_name"]
+        )
+        outcmaes_filename = glob.glob(
+            os.path.join(outcmaes_path, f"{ip_df_dict['SiteID']}_*.dat")
+        )
+
+        # remove incomplete CMAES output files if they exist
+        if len(outcmaes_filename) > 0:
+            for filename in outcmaes_filename:
+                logger.info(
+                    "%s : Deleting incomplete CMAES output file: %s",
+                    ip_df_dict["SiteID"],
+                    filename,
+                )
+                os.remove(filename)
+        ##################################################################
+
+        # perform site optimization
+        optimize_model(
+            ip_df_dict, ip_df_daily_wai, wai_output, time_info, settings_dict
+        )
 
 
 def main_script_forward(idx, site_list, settings_dict):
@@ -290,159 +222,58 @@ def main_script_forward(idx, site_list, settings_dict):
     # get the site id
     site_name = site_list[idx]
 
-    # forward run the model with optimized parameters for all years of each site
-    if settings_dict["opti_type"] == "all_year":
-        opti_dict_path = Path(
-            "opti_results",
-            settings_dict["model_name"],
-            settings_dict["exp_name"],
-            "opti_dicts",
-        )
-        opti_dict_path_filename = os.path.join(
-            opti_dict_path, f"{site_name}_opti_dict.json"
-        )  # filename where optimization results are saved
-        try:
-            with open(
-                opti_dict_path_filename, "r", encoding="utf-8"
-            ) as opti_dict_json_file:  # read the optimization results
-                opti_dict = json.load(opti_dict_json_file)
+    opti_dict_path = Path(
+        "opti_results",
+        settings_dict["model_name"],
+        settings_dict["exp_name"],
+        "opti_dicts",
+    )
+    opti_dict_path_filename = os.path.join(
+        opti_dict_path, f"{site_name}_opti_dict.json"
+    )  # filename where optimization results are saved
+    try:
+        with open(
+            opti_dict_path_filename, "r", encoding="utf-8"
+        ) as opti_dict_json_file:  # read the optimization results
+            opti_dict = json.load(opti_dict_json_file)
 
-            xbest = opti_dict["xbest"]  # get the optimized parameters for the site
+        xbest = opti_dict["xbest"]  # get the optimized parameters for the site
 
-            if (xbest is None) or (
-                np.isnan(np.array(xbest)).any()
-            ):  # if the optimization was not successful, skip the site
-                logger.warning(
-                    "%s : optimization was not successful (skipping forward run)",
-                    site_name,
-                )
-            else:
-                opti_param_names = opti_dict["opti_param_names"]
-
-                # get the forcing data and other information for the site to forward run p-model
-                ip_df_dict, ip_df_daily_wai, wai_output, time_info = get_data(
-                    site_name, settings_dict
-                )
-
-                # forward run model with optimized parameters
-                model_op, p_names, xbest_actual = forward_run_model(
-                    ip_df_dict,
-                    ip_df_daily_wai,
-                    wai_output,
-                    time_info,
-                    settings_dict,
-                    xbest,
-                    opti_param_names,
-                )
-
-                # save and plot model results
-                save_n_plot_model_results(
-                    ip_df_dict, model_op, settings_dict, xbest_actual, p_names
-                )
-
-        # if the optimization results file does not exist, skip the site
-        except FileNotFoundError:
+        if (xbest is None) or (
+            np.isnan(np.array(xbest)).any()
+        ):  # if the optimization was not successful, skip the site
             logger.warning(
-                "%s : optimization was not successful (skipping forward run)", site_name
+                "%s : optimization was not successful (skipping forward run)",
+                site_name,
+            )
+        else:
+            opti_param_names = opti_dict["opti_param_names"]
+
+            # get the forcing data and other information for the site to forward run p-model
+            ip_df_dict, ip_df_daily_wai, wai_output, time_info = get_data(
+                site_name, settings_dict
             )
 
-    # forward run model with optimized parameters for each site year
-    elif settings_dict["opti_type"] == "site_year":
-        # get the forcing data and other information for the site to forward run p-model
-        ip_df_dict, ip_df_daily_wai, wai_output, time_info = get_data(
-            site_name, settings_dict
-        )
+            # forward run model with optimized parameters
+            model_op, p_names, xbest_actual = forward_run_model(
+                ip_df_dict,
+                ip_df_daily_wai,
+                wai_output,
+                time_info,
+                settings_dict,
+                xbest,
+                opti_param_names,
+            )
 
-        # forward run the model with optimized parameters per site year
-        forward_run_site_year_opti(
-            ip_df_dict, ip_df_daily_wai, wai_output, time_info, settings_dict, site_name
-        )
+            # save and plot model results
+            save_n_plot_model_results(
+                ip_df_dict, model_op, settings_dict, xbest_actual, p_names
+            )
 
-    # forward run the model with optimized parameters per PFT
-    elif settings_dict["opti_type"] == "per_pft":
-        # get the forcing data and other information for the site to forward run p-model
-        ip_df_dict, ip_df_daily_wai, wai_output, time_info = get_data(
-            site_name, settings_dict
-        )
-
-        site_pft = ip_df_dict["PFT"]
-
-        opti_dict_path = Path(
-            "opti_results",
-            settings_dict["model_name"],
-            settings_dict["exp_name"],
-            "opti_dicts",
-        )
-        opti_dict_path_filename = os.path.join(
-            opti_dict_path, f"{site_pft}_opti_dict.json"
-        )  # filename where optimization results are saved
-
-        with open(
-            opti_dict_path_filename, "r", encoding="utf-8"
-        ) as opti_dict_json_file:  # read the optimization results
-            opti_dict = json.load(opti_dict_json_file)
-
-        xbest = opti_dict["xbest"]  # get the optimized parameters for the site
-
-        # forward run p-model with optimized parameters
-        model_op, p_names, xbest_actual = forward_run_model(
-            ip_df_dict,
-            ip_df_daily_wai,
-            wai_output,
-            time_info,
-            settings_dict,
-            xbest,
-            opti_dict["opti_param_names"],
-        )
-
-        # save and plot model results
-        save_n_plot_model_results(
-            ip_df_dict, model_op, settings_dict, xbest_actual, p_names
-        )
-
-    # forward run the model with parameters optimized using data of all sites (global optimization)
-    elif settings_dict["opti_type"] == "global_opti":
-        # get the forcing data and other information for the site to forward run p-model
-        ip_df_dict, ip_df_daily_wai, wai_output, time_info = get_data(
-            site_name, settings_dict
-        )
-
-        opti_dict_path = Path(
-            "opti_results",
-            settings_dict["model_name"],
-            settings_dict["exp_name"],
-            "opti_dicts",
-        )
-        opti_dict_path_filename = os.path.join(
-            opti_dict_path, "global_opti_opti_dict.json"
-        )  # filename where optimization results are saved
-
-        with open(
-            opti_dict_path_filename, "r", encoding="utf-8"
-        ) as opti_dict_json_file:  # read the optimization results
-            opti_dict = json.load(opti_dict_json_file)
-
-        xbest = opti_dict["xbest"]  # get the optimized parameters for the site
-
-        # forward run p-model with optimized parameters
-        model_op, p_names, xbest_actual = forward_run_model(
-            ip_df_dict,
-            ip_df_daily_wai,
-            wai_output,
-            time_info,
-            settings_dict,
-            xbest,
-            opti_dict["opti_param_names"],
-        )
-
-        # save and plot model results
-        save_n_plot_model_results(
-            ip_df_dict, model_op, settings_dict, xbest_actual, p_names
-        )
-
-    else:
-        raise ValueError(
-            "opti_type must be one of: all_year, site_year, per_pft, global_opti"
+    # if the optimization results file does not exist, skip the site
+    except FileNotFoundError:
+        logger.warning(
+            "%s : optimization was not successful (skipping forward run)", site_name
         )
 
 
@@ -473,36 +304,9 @@ def main():
         f"_{model_settings['append']}"
     )
 
-    if (
-        (model_settings["opti_type"] == "all_year")
-        or (model_settings["opti_type"] == "global_opti")
-        or (
-            (model_settings["opti_type"] == "site_year")
-            and (model_settings["run_mode"] == "forward")
-        )
-    ):
-        # get site list for which p-model will be optimized/ run forward
-        site_info = pd.read_csv(ROOT_PATH / "site_info/SiteInfo_BRKsite_list.csv")
-        site_id_list = site_info["SiteID"].tolist()
-        # site_id_list = ["BE-Vie", "AT-Neu",
-        #                 "DE-Hai", "GF-Guy", "AU-ASM"] # testing the code with few sites
-    elif (model_settings["opti_type"] == "site_year") and (
-        model_settings["run_mode"] == "optim"
-    ):  # get list of site years for which p-model will be optimized/ run forward
-        site_year_df = pd.read_csv(ROOT_PATH / "site_info/site_year_list.csv")
-        site_id_list = site_year_df["site_year"].tolist()
-        # site_id_list = site_id_list[0:18] # testing the code with few site years
-    elif model_settings["opti_type"] == "per_pft":
-        site_info = pd.read_csv(ROOT_PATH / "site_info/SiteInfo_BRKsite_list.csv")
-        site_id_list = site_info["SiteID"].tolist()  # get list of sites
-
-        # get a dictionary with sites per pft
-        site_pft_grouped = site_info.groupby("PFT")["SiteID"].apply(list)
-        sites_per_pft_dict = site_pft_grouped.to_dict()
-    else:
-        raise ValueError(
-            "opti_type must be one of: all_year, site_year, per_pft, global_opti"
-        )
+    # get site list for which p-model will be optimized/ run forward
+    site_info = pd.read_csv(ROOT_PATH / "site_info/SiteInfo_BRKsite_list.csv")
+    site_id_list = site_info["SiteID"].tolist()
 
     ################################################################################
     # optimize/ forward run p-model
@@ -548,10 +352,7 @@ def main():
 
         #########################################################################
         # Optimizing parameters for all years of each site/ site year in parallel
-        if (model_settings["eval_mode"] == "parallel") and (
-            (model_settings["opti_type"] == "all_year")
-            or (model_settings["opti_type"] == "site_year")
-        ):
+        if model_settings["eval_mode"] == "parallel":
             # #########################################################################
             # This is suitable for using job array index as an argument
             # generate range of site idx per job array
@@ -601,96 +402,8 @@ def main():
             # difference in each line) ends in each log line
 
         #########################################################################
-        # Optimizing parameters for each PFT (site costs are evaluated in parallel)
-        elif (model_settings["eval_mode"] == "parallel") and (
-            model_settings["opti_type"] == "per_pft"
-        ):
-            # configure the logger: to log various information to a file
-            # (e.g., site with less data after quality filtering)
-            logging.basicConfig(
-                filename=(
-                    f"./opti_results/{model_settings['model_name']}/"
-                    f"{model_settings['exp_name']}/model_optimize.log"
-                ),
-                filemode="a",
-                level=logging.INFO,
-                format="[%(asctime)s] %(levelname)s - %(name)s - %(message)s",
-                datefmt="%Y-%m-%d,%H:%M:%S",
-            )
-
-            # determine which PFT to optimize based on an argument passed to the script
-            pft_idx = int(sys.argv[1]) - 1
-            # get a list of PFTs
-            pft_list = list(sites_per_pft_dict.keys())  # type: ignore
-            pft = pft_list[pft_idx]  # get the PFT to be optimized
-
-            # optimize parameters for each PFT
-            opti_per_pft(pft, sites_per_pft_dict, model_settings)  # type: ignore
-
-            # clean the log file
-            input_filename = os.path.join(
-                "opti_results",
-                model_settings["model_name"],
-                model_settings["exp_name"],
-                "model_optimize.log",
-            )
-            output_filename = os.path.join(
-                "opti_results",
-                model_settings["model_name"],
-                model_settings["exp_name"],
-                "model_optimize_clean.log",
-            )
-            filter_logs(
-                input_filename, output_filename, 21
-            )  # 21 is index at which "[%(asctime)s]" (which is only
-            # difference in each line) ends in each log line
-
-        #########################################################################
-        # Perform gobal optimization for all sites (site costs are evaluated in parallel)
-        elif (model_settings["eval_mode"] == "parallel") and (
-            model_settings["opti_type"] == "global_opti"
-        ):
-            # configure the logger: to log various information to a file
-            # (e.g., site with less data after quality filtering)
-            logging.basicConfig(
-                filename=(
-                    f"./opti_results/{model_settings['model_name']}/"
-                    f"{model_settings['exp_name']}/model_optimize.log"
-                ),
-                filemode="a",
-                level=logging.INFO,
-                format="[%(asctime)s] %(levelname)s - %(name)s - %(message)s",
-                datefmt="%Y-%m-%d,%H:%M:%S",
-            )
-
-            # optimize parameters for all sites
-            opti_global(site_id_list, model_settings)
-
-            # clean the log file
-            input_filename = os.path.join(
-                "opti_results",
-                model_settings["model_name"],
-                model_settings["exp_name"],
-                "model_optimize.log",
-            )
-            output_filename = os.path.join(
-                "opti_results",
-                model_settings["model_name"],
-                model_settings["exp_name"],
-                "model_optimize_clean.log",
-            )
-            filter_logs(
-                input_filename, output_filename, 21
-            )  # 21 is index at which "[%(asctime)s]" (which is only
-            # difference in each line) ends in each log line
-
-        #########################################################################
         # Sequential optimization for each site/ site year
-        elif (
-            (model_settings["eval_mode"] == "sequence")
-            and (model_settings["opti_type"] != "per_pft")
-            and (model_settings["opti_type"] != "global_opti")
-        ):
+        elif model_settings["eval_mode"] == "sequence":
             if isinstance(model_settings["site_list"], str):
                 # get the list of sites of interest
                 sites_to_use = model_settings["site_list"].split(", ")

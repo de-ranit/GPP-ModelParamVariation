@@ -105,52 +105,6 @@ def forward_run_model(
             ip_df_dict, params, settings_dict["CO2_var"]
         )
 
-        # # list of parameters which were optimized in all cases
-        # p_names = [
-        #     "acclim_window",
-        #     "W_I",
-        #     "K_W",
-        #     "AWC",
-        #     "theta",
-        #     "alphaPT",
-        #     "meltRate_temp",
-        #     "meltRate_netrad",
-        #     "sn_a",
-        # ]
-        # # alpha was also optimized in fW_Horn for arid sites
-        # if ip_df_dict["KG"][0] == "B":
-        #     # insert alpha at 4th position;
-        #     # to work with old optimization results
-        #     p_names.insert(3, "alpha")
-        #     # p_names.append("alpha")
-        # else:
-        #     pass
-
-        # # in case of global, PFT based optimization, xbest can have optimized parameter value for
-        # # alpha, but we may not need it for specific sites (where KG doesn't start with B)
-        # if (settings_dict["opti_type"] == "global_opti") or (
-        #     settings_dict["opti_type"] == "per_pft"
-        # ):
-        #     if opti_param_names is not None:
-        #         keep_xbest_idx = [
-        #             opti_param_names.index(p) for p in p_names if p in opti_param_names
-        #         ]
-        #         xbest = [xbest[i] for i in keep_xbest_idx]  # only keep the xbest values
-        #         # which are in p_names for a specific site
-        #     else:
-        #         raise ValueError(
-        #             (
-        #                 "`opti_param_names` should be provided when calling `forward_run_model()`"
-        #                 "in case of running model, using optimized parameters"
-        #                 "from global or per PFT optimization"
-        #             )
-        #         )
-
-        # # if parameters scalars were further scaled between 0 and 1,
-        # # convert them back to actual scalar values
-        # if settings_dict["scale_coord"]:
-        #     xbest = scale_back_params(xbest, p_names, params)
-
         if settings_dict["scale_coord"]:
             scale_back_params(xbest, opti_param_names, param_dict)
 
@@ -170,67 +124,6 @@ def forward_run_model(
         )
 
     elif settings_dict["model_name"] == "LUE_model":
-        # # list of parameters which were optimized in all cases
-        # p_names = [
-        #     "LUE_max",
-        #     "T_opt",
-        #     "K_T",
-        #     "Kappa_VPD",
-        #     "Ca_0",
-        #     "C_Kappa",
-        #     "c_m",
-        #     "gamma_fL_TAL",
-        #     "mu_fCI",
-        #     "W_I",
-        #     "K_W",
-        #     "AWC",
-        #     "theta",
-        #     "alphaPT",
-        #     "meltRate_temp",
-        #     "meltRate_netrad",
-        #     "sn_a",
-        # ]
-        # # alpha was also optimized in fW_Horn for arid sites
-        # if ip_df_dict["KG"][0] == "B":
-        #     if settings_dict["opti_type"] == "global_opti":
-        #         # fix to maintain paramter order in case of global optimization
-        #         p_names.insert(11, "alpha")
-        #     else:
-        #         p_names.append("alpha")
-        # # alpha_fT_Horn was also optimized in fT_Horn for temperate,
-        # # continental and polar sites
-        # elif ip_df_dict["KG"][0] in ["C", "D", "E"]:
-        #     if settings_dict["opti_type"] == "global_opti":
-        #         # fix to maintain paramter order in case of global optimization
-        #         p_names.insert(3, "alpha_fT_Horn")
-        #     else:
-        #         p_names.append("alpha_fT_Horn")
-        # else:
-        #     pass
-
-        # in case of global, PFT based optimization, xbest can have optimized parameter value for
-        # alpha and/or alpha_fT_Horn, but we may not need it for a specific site
-        # if (settings_dict["opti_type"] == "global_opti") or (
-        #     settings_dict["opti_type"] == "per_pft"
-        # ):
-        #     if opti_param_names is not None:
-        #         keep_xbest_idx = [
-        #             opti_param_names.index(p) for p in p_names if p in opti_param_names
-        #         ]
-        #         xbest = [xbest[i] for i in keep_xbest_idx]  # only keep the xbest values
-        #         # which are in p_names for a specific site
-        #     else:
-        #         raise ValueError(
-        #             (
-        #                 "`opti_param_names` should be provided when calling `forward_run_model()`"
-        #                 "in case of global or per PFT optimization"
-        #             )
-        #         )
-
-        # if parameters scalars were further scaled between 0 and 1,
-        # convert them back to actual scalar values
-        # if settings_dict["scale_coord"]:
-        #     xbest = scale_back_params(xbest, p_names, params)
         if settings_dict["scale_coord"]:
             xbest = scale_back_params(xbest, opti_param_names, param_dict)
 
@@ -288,9 +181,6 @@ def save_n_plot_model_results(ip_df_dict, model_op, settings_dict, xbest, p_name
         serialized_result_path, f"{ip_df_dict['SiteID']}_result.npy"
     )
     np.save(serialized_result_path_filename, result_dict)  # type: ignore
-
-    # load the results
-    # result_dict_load = np.load(serialized_result_path_filename, allow_pickle=True).item()
 
     # plot and save site level timeseries results
     plot_site_level_results(result_dict, ip_df_dict, settings_dict)
