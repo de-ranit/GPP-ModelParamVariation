@@ -23,8 +23,6 @@ import seaborn as sns
 import pandas as pd
 from permetrics import RegressionMetric
 
-# import glasbey
-from palettable.colorbrewer.qualitative import Dark2_8
 
 # add the path where modules of experiments are stored
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -431,22 +429,18 @@ def plot_axs(
         metric_syr = metric_syr[~np.isnan(metric_syr)]
         metric_dt_nt = metric_dt_nt[~np.isnan(metric_dt_nt)]
 
-    # cols = [
-    #     "#DDDDDD",
-    #     "#2F2485",
-    #     "#347639",
-    #     "#5DA899",
-    #     "#94CAED",
-    #     "#DCCD7D",
-    #     "#C26A77",
-    #     "#9F4A96",
-    # ]
-
-    # cols = glasbey.create_palette(
-    #     palette_size=8, colorblind_safe=True, cvd_severity=100
-    # )
-
-    cols = Dark2_8.hex_colors
+    cols = [
+        "#CC6677",
+        "#332288",
+        "#DDCC77",
+        "#117733",
+        "#88CCEE",
+        "#882255",
+        "#44AA99",
+        "#999933",
+        "black",
+        "#AA4499",
+    ]
 
     if metric_name == "NSE":
         # plot the histograms and KDE - but make histogram invisible and only show KDE
@@ -565,7 +559,7 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[8].set_color("black")
+        ax.lines[8].set_color(cols[8])
         ax.lines[8].set_linewidth(3)
 
         sns.histplot(
@@ -579,8 +573,8 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[9].set_color("#031580")
-        ax.lines[9].set_linestyle("--")
+        ax.lines[9].set_color(cols[9])
+        ax.lines[9].set_linestyle("-.")
 
     else:
         # plot the histograms and KDE - but make histogram invisible and only show KDE
@@ -672,7 +666,7 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[8].set_color("black")
+        ax.lines[8].set_color(cols[8])
         ax.lines[8].set_linewidth(3)
 
         sns.histplot(
@@ -683,20 +677,80 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[9].set_color("#031580")
-        ax.lines[9].set_linestyle("--")
+        ax.lines[9].set_color(cols[9])
+        ax.lines[9].set_linestyle("-.")
 
     # add vertical lines for the median values
-    ax.axvline(x=np.median(metric_g01), linestyle=":", color=cols[0])
-    ax.axvline(x=np.median(metric_g02), linestyle=":", color=cols[1])
-    ax.axvline(x=np.median(metric_g03), linestyle=":", color=cols[2])
-    ax.axvline(x=np.median(metric_g04), linestyle=":", color=cols[3])
-    ax.axvline(x=np.median(metric_g05), linestyle=":", color=cols[4])
-    ax.axvline(x=np.median(metric_g06), linestyle=":", color=cols[5])
-    ax.axvline(x=np.median(metric_g07), linestyle=":", color=cols[6])
-    ax.axvline(x=np.median(metric_g08), linestyle=":", color=cols[7])
-    ax.axvline(x=np.median(metric_syr), linestyle=":", color="black")
-    ax.axvline(x=np.median(metric_dt_nt), linestyle=":", color="#031580")
+    ax.axvline(
+        x=np.median(metric_g01),
+        linestyle=":",
+        color=cols[0],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g02),
+        linestyle=":",
+        color=cols[1],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g03),
+        linestyle=":",
+        color=cols[2],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g04),
+        linestyle=":",
+        color=cols[3],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g05),
+        linestyle=":",
+        color=cols[4],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g06),
+        linestyle=":",
+        color=cols[5],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g07),
+        linestyle=":",
+        color=cols[6],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g08),
+        linestyle=":",
+        color=cols[7],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_syr),
+        linestyle=":",
+        color=cols[8],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_dt_nt),
+        linestyle=":",
+        color=cols[9],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
 
     # set the axis properties
     if metric_name == "NSE":
@@ -824,18 +878,26 @@ def plot_fig_main(result_paths):
     fig.supxlabel("NNSE [-]", y=0.03, fontsize=36)
     fig.supylabel("Fraction of" + r" sites [\%]", x=0.05, fontsize=36)
 
-    colors = Dark2_8.hex_colors
-    colors.append("black")
-    colors.append("#031580")
+    colors = [
+        "#CC6677",
+        "#332288",
+        "#DDCC77",
+        "#117733",
+        "#88CCEE",
+        "#882255",
+        "#44AA99",
+        "#999933",
+        "black",
+        "#AA4499",
+    ]
 
     legend_elements = [
         Line2D(
             [0],
             [0],
-            lw=1,
-            linestyle="-",
+            lmarker="s",
+            color="w",
             label=opti_type,
-            color=colors[i],
             markerfacecolor=colors[i],
             markersize=25,
         )
@@ -857,10 +919,9 @@ def plot_fig_main(result_paths):
         Line2D(
             [0],
             [0],
-            lw=3,
-            linestyle="-",
+            marker="s",
+            color="w",
             label=r"Per site--year parameterization",
-            color="black",
             markerfacecolor="black",
             markersize=25,
         )
@@ -870,10 +931,9 @@ def plot_fig_main(result_paths):
         Line2D(
             [0],
             [0],
-            lw=1,
-            linestyle="--",
+            marker="s",
+            color="w",
             label=r"Between $\mathit{GPP_{NT}}$ and $\mathit{GPP_{DT}}$",
-            color=colors[-1],
             markerfacecolor=colors[-1],
             markersize=25,
         )

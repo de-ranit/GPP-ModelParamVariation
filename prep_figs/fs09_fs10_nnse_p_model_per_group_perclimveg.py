@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
+Plot model performance results of the P model where a group of parameters
+were varied per year, while the rest of the parameters were kept constant
+for a site. The performance metrics are calculated at hourly and annual scales for
+each climate vegetation class.
 
 author: rde
 first created: Mon Feb 10 2025 15:46:44 CET
@@ -19,8 +23,6 @@ import seaborn as sns
 import pandas as pd
 from permetrics import RegressionMetric
 
-# import glasbey
-from palettable.colorbrewer.qualitative import Dark2_4
 
 # add the path where modules of experiments are stored
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -397,8 +399,6 @@ def plot_axs(
         metric_g04 = calc_nnse_rm_nan(metric_g04)
         metric_syr = calc_nnse_rm_nan(metric_syr)
         metric_dt_nt = calc_nnse_rm_nan(metric_dt_nt)
-        # metric_dt_nt = 1.0 / (2.0 - metric_dt_nt)
-        # metric_dt_nt = metric_dt_nt[~np.isnan(metric_g01)]
     else:
         metric_g01 = metric_g01[~np.isnan(metric_g01)]
         metric_g02 = metric_g02[~np.isnan(metric_g02)]
@@ -407,22 +407,14 @@ def plot_axs(
         metric_syr = metric_syr[~np.isnan(metric_syr)]
         metric_dt_nt = metric_dt_nt[~np.isnan(metric_dt_nt)]
 
-    # cols = [
-    #     "#DDDDDD",
-    #     "#2F2485",
-    #     "#347639",
-    #     "#5DA899",
-    #     "#94CAED",
-    #     "#DCCD7D",
-    #     "#C26A77",
-    #     "#9F4A96",
-    # ]
-
-    # cols = glasbey.create_palette(
-    #     palette_size=8, colorblind_safe=True, cvd_severity=100
-    # )
-
-    cols = Dark2_4.hex_colors
+    cols = [
+        "#CC6677",
+        "#332288",
+        "#DDCC77",
+        "#117733",
+        "black",
+        "#AA4499",
+    ]
 
     if metric_name == "NSE":
         # plot the histograms and KDE - but make histogram invisible and only show KDE
@@ -489,7 +481,7 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[4].set_color("black")
+        ax.lines[4].set_color(cols[4])
         ax.lines[4].set_linewidth(3)
 
         sns.histplot(
@@ -503,8 +495,8 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[5].set_color("#031580")
-        ax.lines[5].set_linestyle("--")
+        ax.lines[5].set_color(cols[5])
+        ax.lines[5].set_linestyle("-.")
 
     else:
         # plot the histograms and KDE - but make histogram invisible and only show KDE
@@ -556,7 +548,7 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[4].set_color("black")
+        ax.lines[4].set_color(cols[4])
         ax.lines[4].set_linewidth(3)
 
         sns.histplot(
@@ -567,16 +559,52 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[5].set_color("#031580")
-        ax.lines[5].set_linestyle("--")
+        ax.lines[5].set_color(cols[5])
+        ax.lines[5].set_linestyle("-.")
 
     # add vertical lines for the median values
-    ax.axvline(x=np.median(metric_g01), linestyle=":", color=cols[0])
-    ax.axvline(x=np.median(metric_g02), linestyle=":", color=cols[1])
-    ax.axvline(x=np.median(metric_g03), linestyle=":", color=cols[2])
-    ax.axvline(x=np.median(metric_g04), linestyle=":", color=cols[3])
-    ax.axvline(x=np.median(metric_syr), linestyle=":", color="black")
-    ax.axvline(x=np.median(metric_dt_nt), linestyle=":", color="#031580")
+    ax.axvline(
+        x=np.median(metric_g01),
+        linestyle=":",
+        color=cols[0],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g02),
+        linestyle=":",
+        color=cols[1],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g03),
+        linestyle=":",
+        color=cols[2],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g04),
+        linestyle=":",
+        color=cols[3],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_syr),
+        linestyle=":",
+        color=cols[4],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_dt_nt),
+        linestyle=":",
+        color=cols[5],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
 
     # set the axis properties
     if metric_name == "NSE":
@@ -592,7 +620,6 @@ def plot_axs(
         ax.set_xticklabels([int(x) for x in np.arange(-15, 8, 3).tolist()])
 
     ax.tick_params(axis="both", which="major", labelsize=26.0)
-    # ax.tick_params(axis="x", labelrotation=45)
     ax.set_ylabel("")
     ax.set_title(f"{title} ({len(metric_g02)})", size=30)
 
@@ -683,18 +710,22 @@ def plot_fig_main(result_paths):
     fig.supxlabel("NNSE [-]", y=0.03, fontsize=36)
     fig.supylabel("Fraction of" + r" sites [\%]", x=0.05, fontsize=36)
 
-    colors = Dark2_4.hex_colors
-    colors.append("black")
-    colors.append("#031580")
+    colors = [
+        "#CC6677",
+        "#332288",
+        "#DDCC77",
+        "#117733",
+        "black",
+        "#AA4499",
+    ]
 
     legend_elements = [
         Line2D(
             [0],
             [0],
-            lw=1,
-            linestyle="-",
+            marker="s",
+            color="w",
             label=opti_type,
-            color=colors[i],
             markerfacecolor=colors[i],
             markersize=25,
         )
@@ -712,10 +743,9 @@ def plot_fig_main(result_paths):
         Line2D(
             [0],
             [0],
-            lw=3,
-            linestyle="-",
+            marker="s",
+            color="w",
             label=r"Per site--year parameterization",
-            color="black",
             markerfacecolor="black",
             markersize=25,
         )
@@ -725,10 +755,9 @@ def plot_fig_main(result_paths):
         Line2D(
             [0],
             [0],
-            lw=1,
-            linestyle="--",
+            marker="s",
+            color="w",
             label=r"Between $\mathit{GPP_{NT}}$ and GPP$_{\text{DT}}$",
-            color=colors[-1],
             markerfacecolor=colors[-1],
             markersize=25,
         )
@@ -745,8 +774,12 @@ def plot_fig_main(result_paths):
 
     fig_path = Path("figures")
     os.makedirs(fig_path, exist_ok=True)
-    plt.savefig("./supplement_figs/fs09_nnse_p_hr_climveg.png", dpi=300, bbox_inches="tight")
-    plt.savefig("./supplement_figs/fs09_nnse_p_hr_climveg.pdf", dpi=300, bbox_inches="tight")
+    plt.savefig(
+        "./supplement_figs/fs09_nnse_p_hr_climveg.png", dpi=300, bbox_inches="tight"
+    )
+    plt.savefig(
+        "./supplement_figs/fs09_nnse_p_hr_climveg.pdf", dpi=300, bbox_inches="tight"
+    )
     plt.close("all")
 
     ###############################
@@ -807,8 +840,12 @@ def plot_fig_main(result_paths):
 
     fig_path = Path("figures")
     os.makedirs(fig_path, exist_ok=True)
-    plt.savefig("./supplement_figs/fs10_nnse_p_yy_climveg.png", dpi=300, bbox_inches="tight")
-    plt.savefig("./supplement_figs/fs10_nnse_p_yy_climveg.pdf", dpi=300, bbox_inches="tight")
+    plt.savefig(
+        "./supplement_figs/fs10_nnse_p_yy_climveg.png", dpi=300, bbox_inches="tight"
+    )
+    plt.savefig(
+        "./supplement_figs/fs10_nnse_p_yy_climveg.pdf", dpi=300, bbox_inches="tight"
+    )
     plt.close("all")
 
     columns = [

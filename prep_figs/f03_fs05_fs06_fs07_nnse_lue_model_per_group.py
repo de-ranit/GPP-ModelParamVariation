@@ -22,9 +22,6 @@ import seaborn as sns
 import pandas as pd
 from permetrics import RegressionMetric
 
-# import glasbey
-from palettable.colorbrewer.qualitative import Dark2_8
-
 # add the path where modules of experiments are stored
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 MAIN_DIR = os.path.dirname(SCRIPT_PATH)
@@ -32,7 +29,7 @@ sys.path.append(MAIN_DIR)
 
 from src.common.get_data import read_nc_data  # pylint: disable=C0413
 from src.common.get_data import df_to_dict  # pylint: disable=C0413
-from src.postprocess.prep_results import ( # pylint: disable=C0413
+from src.postprocess.prep_results import (  # pylint: disable=C0413
     calc_variability_metrics,
 )  # pylint: disable=C0413
 from src.postprocess.prep_results import calc_bias_metrics  # pylint: disable=C0413
@@ -310,8 +307,6 @@ def plot_axs(
         metric_g08 = calc_nnse_rm_nan(metric_g08)
         metric_syr = calc_nnse_rm_nan(metric_syr)
         metric_dt_nt = calc_nnse_rm_nan(metric_dt_nt)
-        # metric_dt_nt = 1.0 / (2.0 - metric_dt_nt)
-        # metric_dt_nt = metric_dt_nt[~np.isnan(metric_g01)]
     else:
         metric_g01 = metric_g01[~np.isnan(metric_g01)]
         metric_g02 = metric_g02[~np.isnan(metric_g02)]
@@ -324,23 +319,19 @@ def plot_axs(
         metric_syr = metric_syr[~np.isnan(metric_syr)]
         metric_dt_nt = metric_dt_nt[~np.isnan(metric_dt_nt)]
 
-    # cols = [
-    #     "#DDDDDD",
-    #     "#2F2485",
-    #     "#347639",
-    #     "#5DA899",
-    #     "#94CAED",
-    #     "#DCCD7D",
-    #     "#C26A77",
-    #     "#9F4A96",
-    # ]
+    cols = [
+        "#CC6677",
+        "#332288",
+        "#DDCC77",
+        "#117733",
+        "#88CCEE",
+        "#882255",
+        "#44AA99",
+        "#999933",
+        "black",
+        "#AA4499",
+    ]
 
-    # cols = glasbey.create_palette(
-    #     palette_size=8, colorblind_safe=True, cvd_severity=100
-    # )
-
-    cols = Dark2_8.hex_colors
-    
     if metric_name == "NSE":
         # plot the histograms and KDE - but make histogram invisible and only show KDE
         sns.histplot(
@@ -458,7 +449,7 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[8].set_color("black")
+        ax.lines[8].set_color(cols[8])
         ax.lines[8].set_linewidth(3)
 
         sns.histplot(
@@ -472,8 +463,8 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[9].set_color("#031580")
-        ax.lines[9].set_linestyle("--")
+        ax.lines[9].set_color(cols[9])
+        ax.lines[9].set_linestyle("-.")
 
     else:
         # plot the histograms and KDE - but make histogram invisible and only show KDE
@@ -565,7 +556,7 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[8].set_color("black")
+        ax.lines[8].set_color(cols[8])
         ax.lines[8].set_linewidth(3)
 
         sns.histplot(
@@ -576,20 +567,80 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[9].set_color("#031580")
-        ax.lines[9].set_linestyle("--")
+        ax.lines[9].set_color(cols[9])
+        ax.lines[9].set_linestyle("-.")
 
     # add vertical lines for the median values
-    ax.axvline(x=np.median(metric_g01), linestyle=":", color=cols[0])
-    ax.axvline(x=np.median(metric_g02), linestyle=":", color=cols[1])
-    ax.axvline(x=np.median(metric_g03), linestyle=":", color=cols[2])
-    ax.axvline(x=np.median(metric_g04), linestyle=":", color=cols[3])
-    ax.axvline(x=np.median(metric_g05), linestyle=":", color=cols[4])
-    ax.axvline(x=np.median(metric_g06), linestyle=":", color=cols[5])
-    ax.axvline(x=np.median(metric_g07), linestyle=":", color=cols[6])
-    ax.axvline(x=np.median(metric_g08), linestyle=":", color=cols[7])
-    ax.axvline(x=np.median(metric_syr), linestyle=":", color="black")
-    ax.axvline(x=np.median(metric_dt_nt), linestyle=":", color="#031580")
+    ax.axvline(
+        x=np.median(metric_g01),
+        linestyle=":",
+        color=cols[0],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g02),
+        linestyle=":",
+        color=cols[1],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g03),
+        linestyle=":",
+        color=cols[2],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g04),
+        linestyle=":",
+        color=cols[3],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g05),
+        linestyle=":",
+        color=cols[4],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g06),
+        linestyle=":",
+        color=cols[5],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g07),
+        linestyle=":",
+        color=cols[6],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g08),
+        linestyle=":",
+        color=cols[7],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_syr),
+        linestyle=":",
+        color=cols[8],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_dt_nt),
+        linestyle=":",
+        color=cols[9],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
 
     # set the axis properties
     if metric_name == "NSE":
@@ -605,7 +656,6 @@ def plot_axs(
         ax.set_xticklabels([int(x) for x in np.arange(-15, 8, 3).tolist()])
 
     ax.tick_params(axis="both", which="major", labelsize=26.0)
-    # ax.tick_params(axis="x", labelrotation=45)
     ax.set_ylabel("")
     ax.set_title(f"{title} ({len(metric_g02)})", size=30)
 
@@ -639,7 +689,8 @@ def plot_fig_main(result_paths):
     """
 
     nse_yy_g01, nse_hr_g01 = get_mod_res_perform_arr(
-        result_paths.g01_vary_lue_model_res_path, "NSE",
+        result_paths.g01_vary_lue_model_res_path,
+        "NSE",
     )
     nse_yy_g02, nse_hr_g02 = get_mod_res_perform_arr(
         result_paths.g02_vary_lue_model_res_path, "NSE"
@@ -811,31 +862,26 @@ def plot_fig_main(result_paths):
     fig.supylabel("Fraction of" + r" sites [\%]", x=0.05, fontsize=36)
 
     # Adding legend manually
-    # colors = [
-    #     "#DDDDDD",
-    #     "#2F2485",
-    #     "#347639",
-    #     "#5DA899",
-    #     "#94CAED",
-    #     "#DCCD7D",
-    #     "#C26A77",
-    #     "#9F4A96",
-    # ]
-    # colors = glasbey.create_palette(
-    #     palette_size=8, colorblind_safe=True, cvd_severity=100
-    # )
-    colors = Dark2_8.hex_colors
-    colors.append("black")
-    colors.append("#031580")
+    colors = [
+        "#CC6677",
+        "#332288",
+        "#DDCC77",
+        "#117733",
+        "#88CCEE",
+        "#882255",
+        "#44AA99",
+        "#999933",
+        "black",
+        "#AA4499",
+    ]
 
     legend_elements = [
         Line2D(
             [0],
             [0],
-            lw=1,
-            linestyle="-",
+            marker="s",
+            color="w",
             label=opti_type,
-            color=colors[i],
             markerfacecolor=colors[i],
             markersize=25,
         )
@@ -848,7 +894,7 @@ def plot_fig_main(result_paths):
                 r"Group 05 ($fCI$)",
                 r"Group 06 ($fW$)",
                 r"Group 07 ($WAI$)",
-                r"Group 08 ($WAI$ + $fW$)"
+                r"Group 08 ($WAI$ + $fW$)",
             ]
         )
     ]
@@ -857,10 +903,9 @@ def plot_fig_main(result_paths):
         Line2D(
             [0],
             [0],
-            lw=3,
-            linestyle="-",
+            marker="s",
+            color="w",
             label=r"Per site--year parameterization",
-            color="black",
             markerfacecolor="black",
             markersize=25,
         )
@@ -870,10 +915,9 @@ def plot_fig_main(result_paths):
         Line2D(
             [0],
             [0],
-            lw=1,
-            linestyle="--",
+            marker="s",
+            color="w",
             label=r"Between $\mathit{GPP_{NT}}$ and $\mathit{GPP_{DT}}$",
-            color=colors[-1],
             markerfacecolor=colors[-1],
             markersize=25,
         )
@@ -1087,8 +1131,12 @@ def plot_fig_main(result_paths):
 
     fig_path = Path("supplement_figs")
     os.makedirs(fig_path, exist_ok=True)
-    plt.savefig("./supplement_figs/fs07_variability_lue.png", dpi=300, bbox_inches="tight")
-    plt.savefig("./supplement_figs/fs07_variability_lue.pdf", dpi=300, bbox_inches="tight")
+    plt.savefig(
+        "./supplement_figs/fs07_variability_lue.png", dpi=300, bbox_inches="tight"
+    )
+    plt.savefig(
+        "./supplement_figs/fs07_variability_lue.pdf", dpi=300, bbox_inches="tight"
+    )
     plt.close("all")
 
     df_varib = pd.DataFrame([hr_varib_dict, yy_varib_dict])

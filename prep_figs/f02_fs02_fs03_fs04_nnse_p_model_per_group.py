@@ -23,8 +23,6 @@ import seaborn as sns
 import pandas as pd
 from permetrics import RegressionMetric
 
-# import glasbey
-from palettable.colorbrewer.qualitative import Dark2_4
 
 # add the path where modules of experiments are stored
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -303,13 +301,14 @@ def plot_axs(
         metric_syr = metric_syr[~np.isnan(metric_syr)]
         metric_dt_nt = metric_dt_nt[~np.isnan(metric_dt_nt)]
 
-    # cols = ["#DDDDDD", "#2F2485", "#347639", "#5DA899"]
-
-    # cols = glasbey.create_palette(
-    #     palette_size=4, colorblind_safe=True, cvd_severity=100
-    # )
-
-    cols = Dark2_4.hex_colors
+    cols = [
+        "#CC6677",
+        "#332288",
+        "#DDCC77",
+        "#117733",
+        "black",
+        "#AA4499",
+    ]
 
     if metric_name == "NSE":
         # plot the histograms and KDE - but make histogram invisible and only show KDE
@@ -376,7 +375,7 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[4].set_color("black")
+        ax.lines[4].set_color(cols[4])
         ax.lines[4].set_linewidth(4)
 
         sns.histplot(
@@ -390,8 +389,8 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[5].set_color("#031580")
-        ax.lines[5].set_linestyle("--")
+        ax.lines[5].set_color(cols[5])
+        ax.lines[5].set_linestyle("-.")
 
     else:
         # plot the histograms and KDE - but make histogram invisible and only show KDE
@@ -454,16 +453,52 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[5].set_color("#031580")
-        ax.lines[5].set_linestyle("--")
+        ax.lines[5].set_color(cols[5])
+        ax.lines[5].set_linestyle("-.")
 
     # add vertical lines for the median values
-    ax.axvline(x=np.median(metric_g01), linestyle=":", color=cols[0])
-    ax.axvline(x=np.median(metric_g02), linestyle=":", color=cols[1])
-    ax.axvline(x=np.median(metric_g03), linestyle=":", color=cols[2])
-    ax.axvline(x=np.median(metric_g04), linestyle=":", color=cols[3])
-    ax.axvline(x=np.median(metric_syr), linestyle=":", color="black")
-    ax.axvline(x=np.median(metric_dt_nt), linestyle=":", color="#031580")
+    ax.axvline(
+        x=np.median(metric_g01),
+        linestyle=":",
+        color=cols[0],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g02),
+        linestyle=":",
+        color=cols[1],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g03),
+        linestyle=":",
+        color=cols[2],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g04),
+        linestyle=":",
+        color=cols[3],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_syr),
+        linestyle=":",
+        color=cols[4],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_dt_nt),
+        linestyle=":",
+        color=cols[5],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
 
     # set the axis properties
     if metric_name == "NSE":
@@ -476,12 +511,7 @@ def plot_axs(
         ax.set_xticks(np.arange(-1, 6, 1))
         ax.set_xticklabels([int(x) for x in np.arange(-1, 6, 1).tolist()])
 
-    # elif (metric_name == "bias") and (title == r"(b) P$^{\text{W}}_{\text{hr}}$ model - annual"):
-    #     ax.set_xticks(np.arange(-15, 8, 3))
-    #     ax.set_xticklabels([int(x) for x in np.arange(-15, 8, 3).tolist()])
-
     ax.tick_params(axis="both", which="major", labelsize=26.0)
-    # ax.tick_params(axis="x", labelrotation=45)
     ax.set_ylabel("")
     ax.set_title(f"{title} ({len(metric_g02)})", size=30)
 
@@ -627,27 +657,22 @@ def plot_fig_main(result_paths):
     fig.supylabel("Fraction of" + r" sites [\%]", x=0.05, fontsize=36)
 
     # Adding legend manually
-    # colors = [
-    #     "#DDDDDD",
-    #     "#2F2485",
-    #     "#347639",
-    #     "#5DA899",
-    # ]
-    # colors = glasbey.create_palette(
-    #     palette_size=4, colorblind_safe=True, cvd_severity=100
-    # )
-    colors = Dark2_4.hex_colors
-    colors.append("black")
-    colors.append("#031580")
+    colors = [
+        "#CC6677",
+        "#332288",
+        "#DDCC77",
+        "#117733",
+        "black",
+        "#AA4499",
+    ]
 
     legend_elements = [
         Line2D(
             [0],
             [0],
-            lw=1,
-            linestyle="-",
+            marker="s",
+            color="w",
             label=opti_type,
-            color=colors[i],
             markerfacecolor=colors[i],
             markersize=25,
         )
@@ -665,10 +690,9 @@ def plot_fig_main(result_paths):
         Line2D(
             [0],
             [0],
-            lw=3,
-            linestyle="-",
+            marker="s",
+            color="w",
             label=r"Per site--year parameterization",
-            color="black",
             markerfacecolor="black",
             markersize=25,
         )
@@ -678,10 +702,9 @@ def plot_fig_main(result_paths):
         Line2D(
             [0],
             [0],
-            lw=1,
-            linestyle="--",
+            marker="s",
+            color="w",
             label=r"Between $\mathit{GPP_{NT}}$ and $\mathit{GPP_{DT}}$",
-            color=colors[-1],
             markerfacecolor=colors[-1],
             markersize=25,
         )
@@ -871,8 +894,12 @@ def plot_fig_main(result_paths):
 
     fig_path = Path("supplement_figs")
     os.makedirs(fig_path, exist_ok=True)
-    plt.savefig("./supplement_figs/fs04_variability_p.png", dpi=300, bbox_inches="tight")
-    plt.savefig("./supplement_figs/fs04_variability_p.pdf", dpi=300, bbox_inches="tight")
+    plt.savefig(
+        "./supplement_figs/fs04_variability_p.png", dpi=300, bbox_inches="tight"
+    )
+    plt.savefig(
+        "./supplement_figs/fs04_variability_p.pdf", dpi=300, bbox_inches="tight"
+    )
     plt.close("all")
 
     df_varib = pd.DataFrame([hr_varib_dict, yy_varib_dict])
