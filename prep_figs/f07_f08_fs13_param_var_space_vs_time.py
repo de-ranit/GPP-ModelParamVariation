@@ -239,7 +239,9 @@ def format_number(value, base_str):
         ret_string = (
             base_str
             + str(mantissa)
-            + r" $\times 10^{{{}}}$".format(str(exponent))  # pylint: disable=C0209
+            + r"$\boldsymbol{{\times 10^{{{}}}}}$".format( # pylint: disable=C0209
+                str(exponent)
+            )
         )
 
     return ret_string
@@ -367,61 +369,61 @@ def plot_axs_param_dens(
 
     if (model_name == "LUE_model") and (var == "clim"):
         if axtitle == "(c)" or axtitle == "(i)":
-            mad_sp_site_text_x_pos = 0.89
-            mad_sp_site_yr_text_x_pos = 0.88
-            mad_temporal_text_x_pos = 0.91
-        elif axtitle == "(f)" or axtitle == "(j)":
             mad_sp_site_text_x_pos = 1.02
             mad_sp_site_yr_text_x_pos = 1.01
-            mad_temporal_text_x_pos = 1.04
+            mad_temporal_text_x_pos = 1.05
+        elif axtitle == "(f)" or axtitle == "(j)":
+            mad_sp_site_text_x_pos = 1.14
+            mad_sp_site_yr_text_x_pos = 1.13
+            mad_temporal_text_x_pos = 1.16
         else:
-            mad_sp_site_text_x_pos = 0.85
-            mad_sp_site_yr_text_x_pos = 0.84
-            mad_temporal_text_x_pos = 0.87
+            mad_sp_site_text_x_pos = 0.98
+            mad_sp_site_yr_text_x_pos = 0.97
+            mad_temporal_text_x_pos = 1.00
 
     if (model_name == "LUE_model") and (var == "hydro"):
         if axtitle == "(i)":
-            mad_sp_site_text_x_pos = 0.88
-            mad_sp_site_yr_text_x_pos = 0.87
-            mad_temporal_text_x_pos = 0.90
-        elif axtitle == "(c)":
-            mad_sp_site_text_x_pos = 1.23
-            mad_sp_site_yr_text_x_pos = 1.22
-            mad_temporal_text_x_pos = 1.25
-        elif axtitle == "(d)":
-            mad_sp_site_text_x_pos = 1.09
-            mad_sp_site_yr_text_x_pos = 1.08
-            mad_temporal_text_x_pos = 1.10
-        elif axtitle == "(e)":
-            mad_sp_site_text_x_pos = 1.03
-            mad_sp_site_yr_text_x_pos = 1.02
-            mad_temporal_text_x_pos = 1.05
-        elif axtitle == "(g)":
-            mad_sp_site_text_x_pos = 0.94
-            mad_sp_site_yr_text_x_pos = 0.93
-            mad_temporal_text_x_pos = 0.96
-        else:
-            mad_sp_site_text_x_pos = 0.85
-            mad_sp_site_yr_text_x_pos = 0.84
-            mad_temporal_text_x_pos = 0.87
-
-    if model_name == "P_model":
-        if axtitle == "(a)":
-            mad_sp_site_text_x_pos = 1.08
-            mad_sp_site_yr_text_x_pos = 1.07
-            mad_temporal_text_x_pos = 1.10
-        elif axtitle == "(b)":
-            mad_sp_site_text_x_pos = 0.90
-            mad_sp_site_yr_text_x_pos = 0.89
-            mad_temporal_text_x_pos = 0.92
-        elif axtitle == "(e)" or axtitle == "(h)" or axtitle == "(i)":
             mad_sp_site_text_x_pos = 1.07
             mad_sp_site_yr_text_x_pos = 1.06
             mad_temporal_text_x_pos = 1.09
+        elif axtitle == "(c)":
+            mad_sp_site_text_x_pos = 1.41
+            mad_sp_site_yr_text_x_pos = 1.40
+            mad_temporal_text_x_pos = 1.43
+        elif axtitle == "(d)":
+            mad_sp_site_text_x_pos = 1.28
+            mad_sp_site_yr_text_x_pos = 1.27
+            mad_temporal_text_x_pos = 1.30
+        elif axtitle == "(e)":
+            mad_sp_site_text_x_pos = 1.20
+            mad_sp_site_yr_text_x_pos = 1.19
+            mad_temporal_text_x_pos = 1.21
+        elif axtitle == "(g)":
+            mad_sp_site_text_x_pos = 1.13
+            mad_sp_site_yr_text_x_pos = 1.12
+            mad_temporal_text_x_pos = 1.15
         else:
-            mad_sp_site_text_x_pos = 0.85
-            mad_sp_site_yr_text_x_pos = 0.84
-            mad_temporal_text_x_pos = 0.87
+            mad_sp_site_text_x_pos = 1.03
+            mad_sp_site_yr_text_x_pos = 1.02
+            mad_temporal_text_x_pos = 1.05
+
+    if model_name == "P_model":
+        if axtitle == "(a)":
+            mad_sp_site_text_x_pos = 1.31
+            mad_sp_site_yr_text_x_pos = 1.30
+            mad_temporal_text_x_pos = 1.33
+        elif axtitle == "(b)":
+            mad_sp_site_text_x_pos = 1.11
+            mad_sp_site_yr_text_x_pos = 1.10
+            mad_temporal_text_x_pos = 1.13
+        elif axtitle == "(e)" or axtitle == "(h)" or axtitle == "(i)":
+            mad_sp_site_text_x_pos = 1.28
+            mad_sp_site_yr_text_x_pos = 1.27
+            mad_temporal_text_x_pos = 1.30
+        else:
+            mad_sp_site_text_x_pos = 1.00
+            mad_sp_site_yr_text_x_pos = 0.99
+            mad_temporal_text_x_pos = 1.01
 
     mad_sp_site_text_y_pos = 0.9
     mad_sp_site_yr_text_y_pos = 0.77
@@ -430,8 +432,12 @@ def plot_axs_param_dens(
     axis.text(
         mad_sp_site_text_x_pos,
         mad_sp_site_text_y_pos,
-        format_number(mad_sp_site_val, r"$\mathit{MAD_{SP | P_s}}$ = "),
-        fontsize=20,
+        r"\textbf{{{}}}".format(
+            format_number(
+                mad_sp_site_val, r"$\boldsymbol{\mathit{MAD_{SP | P_s}} =\ }$"
+            )
+        ),
+        fontsize=24,
         ha="center",
         va="center",
         color=cols[0],
@@ -440,8 +446,12 @@ def plot_axs_param_dens(
     axis.text(
         mad_sp_site_yr_text_x_pos,
         mad_sp_site_yr_text_y_pos,
-        format_number(mad_sp_site_yr_val, r"$\mathit{MAD_{SP | P_{s,y}}}$ = "),
-        fontsize=20,
+        r"\textbf{{{}}}".format(
+            format_number(
+                mad_sp_site_yr_val, r"$\boldsymbol{\mathit{MAD_{SP | P_{s,y}}} =\ }$"
+            )
+        ),
+        fontsize=24,
         ha="center",
         va="center",
         color=cols[1],
@@ -450,8 +460,13 @@ def plot_axs_param_dens(
     axis.text(
         mad_temporal_text_x_pos,
         mad_temporal_text_y_pos,
-        format_number(np.median(mad_temporal), r"$\mathit{\overline{MAD_{TP}}}$ = "),
-        fontsize=20,
+        r"\textbf{{{}}}".format(
+            format_number(
+                np.median(mad_temporal),
+                r"$\boldsymbol{\mathit{\overline{MAD_{TP}}} =\ }$",
+            )
+        ),
+        fontsize=24,
         ha="center",
         va="center",
         color=cols[2],
@@ -608,7 +623,7 @@ def plot_param_variance(per_site_yr_res_path, per_site_res_path, model_name):
             fig_lue_clim.delaxes(axs[subplot_indices(3, 4, splot_ix)])
 
         # # adjust the spacing between the subplots
-        fig_lue_clim.subplots_adjust(hspace=0.75, wspace=0.4)
+        fig_lue_clim.subplots_adjust(hspace=0.75, wspace=0.6)
 
         fig_lue_clim.add_artist(
             lines.Line2D(
@@ -727,7 +742,7 @@ def plot_param_variance(per_site_yr_res_path, per_site_res_path, model_name):
             fig_lue_hydro.delaxes(axs[subplot_indices(3, 4, splot_ix)])
 
         # # adjust the spacing between the subplots
-        fig_lue_hydro.subplots_adjust(hspace=0.6, wspace=0.5)
+        fig_lue_hydro.subplots_adjust(hspace=0.6, wspace=0.93)
 
         fig_lue_hydro.add_artist(
             lines.Line2D(
@@ -827,7 +842,7 @@ def plot_param_variance(per_site_yr_res_path, per_site_res_path, model_name):
             fig_p.delaxes(axs[subplot_indices(4, 3, splot_ix)])
 
         # adjust the spacing between the subplots
-        fig_p.subplots_adjust(hspace=0.9, wspace=0.5)
+        fig_p.subplots_adjust(hspace=0.9, wspace=1.01)
         fig_p.supylabel(r"Fraction of sites [\%]", x=0.05, fontsize=50)
 
         fig_p.add_artist(
