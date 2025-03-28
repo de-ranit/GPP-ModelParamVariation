@@ -410,24 +410,29 @@ def plot_axs_param_dens(
     if model_name == "P_model":
         if axtitle == "(a)":
             mad_sp_site_text_x_pos = 1.31
-            mad_sp_site_yr_text_x_pos = 1.30
+            mad_sp_site_yr_text_x_pos = 1.32
             mad_temporal_text_x_pos = 1.33
         elif axtitle == "(b)":
             mad_sp_site_text_x_pos = 1.11
-            mad_sp_site_yr_text_x_pos = 1.10
+            mad_sp_site_yr_text_x_pos = 1.12
             mad_temporal_text_x_pos = 1.13
         elif axtitle == "(e)" or axtitle == "(h)" or axtitle == "(i)":
             mad_sp_site_text_x_pos = 1.28
-            mad_sp_site_yr_text_x_pos = 1.27
+            mad_sp_site_yr_text_x_pos = 1.30
             mad_temporal_text_x_pos = 1.30
         else:
             mad_sp_site_text_x_pos = 1.00
-            mad_sp_site_yr_text_x_pos = 0.99
+            mad_sp_site_yr_text_x_pos = 1.00
             mad_temporal_text_x_pos = 1.01
 
-    mad_sp_site_text_y_pos = 0.9
-    mad_sp_site_yr_text_y_pos = 0.77
-    mad_temporal_text_y_pos = 0.65
+    if model_name == "P_model":
+        mad_sp_site_text_y_pos = 0.9
+        mad_sp_site_yr_text_y_pos = 0.77
+        mad_temporal_text_y_pos = 0.63
+    else:
+        mad_sp_site_text_y_pos = 0.9
+        mad_sp_site_yr_text_y_pos = 0.77
+        mad_temporal_text_y_pos = 0.65
 
     axis.text(
         mad_sp_site_text_x_pos,
