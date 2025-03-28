@@ -239,7 +239,7 @@ def format_number(value, base_str):
         ret_string = (
             base_str
             + str(mantissa)
-            + r"$\boldsymbol{{\times 10^{{{}}}}}$".format( # pylint: disable=C0209
+            + r"$\boldsymbol{{\times 10^{{{}}}}}$".format(  # pylint: disable=C0209
                 str(exponent)
             )
         )
@@ -349,6 +349,7 @@ def plot_axs_param_dens(
         edgecolor="white",
     )
     axis.lines[0].set_color(cols[2])
+    axis.lines[0].set_linewidth(2)
 
     # add the axis labels
     axis.set_xlabel(xlabel_dict[param_name], fontdict={"size": 36})
@@ -363,9 +364,19 @@ def plot_axs_param_dens(
         r"\textbf{{{}}}".format(f"{axtitle}"), fontsize=36  # pylint: disable=C0209
     )
 
-    axis.axvline(x=mad_sp_site_val, linestyle=":", color=cols[0])
-    axis.axvline(x=mad_sp_site_yr_val, linestyle=":", color=cols[1])
-    axis.axvline(x=np.median(mad_temporal), linestyle=":", color=cols[2])
+    axis.axvline(
+        x=mad_sp_site_val, linestyle=":", color=cols[0], linewidth=2, dashes=(4, 2)
+    )
+    axis.axvline(
+        x=mad_sp_site_yr_val, linestyle=":", color=cols[1], linewidth=2, dashes=(4, 2)
+    )
+    axis.axvline(
+        x=np.median(mad_temporal),
+        linestyle=":",
+        color=cols[2],
+        linewidth=2,
+        dashes=(4, 2),
+    )
 
     if (model_name == "LUE_model") and (var == "clim"):
         if axtitle == "(c)" or axtitle == "(i)":
@@ -384,27 +395,27 @@ def plot_axs_param_dens(
     if (model_name == "LUE_model") and (var == "hydro"):
         if axtitle == "(i)":
             mad_sp_site_text_x_pos = 1.07
-            mad_sp_site_yr_text_x_pos = 1.06
+            mad_sp_site_yr_text_x_pos = 1.08
             mad_temporal_text_x_pos = 1.09
         elif axtitle == "(c)":
             mad_sp_site_text_x_pos = 1.41
-            mad_sp_site_yr_text_x_pos = 1.40
+            mad_sp_site_yr_text_x_pos = 1.42
             mad_temporal_text_x_pos = 1.43
         elif axtitle == "(d)":
             mad_sp_site_text_x_pos = 1.28
-            mad_sp_site_yr_text_x_pos = 1.27
+            mad_sp_site_yr_text_x_pos = 1.31
             mad_temporal_text_x_pos = 1.30
         elif axtitle == "(e)":
             mad_sp_site_text_x_pos = 1.20
-            mad_sp_site_yr_text_x_pos = 1.19
+            mad_sp_site_yr_text_x_pos = 1.21
             mad_temporal_text_x_pos = 1.21
         elif axtitle == "(g)":
             mad_sp_site_text_x_pos = 1.13
-            mad_sp_site_yr_text_x_pos = 1.12
+            mad_sp_site_yr_text_x_pos = 1.14
             mad_temporal_text_x_pos = 1.15
         else:
             mad_sp_site_text_x_pos = 1.03
-            mad_sp_site_yr_text_x_pos = 1.02
+            mad_sp_site_yr_text_x_pos = 1.04
             mad_temporal_text_x_pos = 1.05
 
     if model_name == "P_model":
@@ -620,8 +631,9 @@ def plot_param_variance(per_site_yr_res_path, per_site_res_path, model_name):
             )
             perc_diff_dict_lue_clim["param"].append(p_to_plot)
             perc_diff_dict_lue_clim["perc_diff_tp_sp_site"].append(perc_diff_tp_sp_site)
-            perc_diff_dict_lue_clim["perc_diff_tp_sp_site_yr"].append(perc_diff_tp_sp_site_yr)
-
+            perc_diff_dict_lue_clim["perc_diff_tp_sp_site_yr"].append(
+                perc_diff_tp_sp_site_yr
+            )
 
         # remove the empty subplots
         for splot_ix in [4, 8]:
@@ -738,9 +750,12 @@ def plot_param_variance(per_site_yr_res_path, per_site_res_path, model_name):
                 "hydro",
             )
             perc_diff_dict_lue_hydro["param"].append(p_to_plot)
-            perc_diff_dict_lue_hydro["perc_diff_tp_sp_site"].append(perc_diff_tp_sp_site)
-            perc_diff_dict_lue_hydro["perc_diff_tp_sp_site_yr"].append(perc_diff_tp_sp_site_yr)
-
+            perc_diff_dict_lue_hydro["perc_diff_tp_sp_site"].append(
+                perc_diff_tp_sp_site
+            )
+            perc_diff_dict_lue_hydro["perc_diff_tp_sp_site_yr"].append(
+                perc_diff_tp_sp_site_yr
+            )
 
         # remove the empty subplots
         for splot_ix in [4, 11, 12]:
@@ -840,7 +855,9 @@ def plot_param_variance(per_site_yr_res_path, per_site_res_path, model_name):
             )
             perc_diff_dict_p_all["param"].append(p_to_plot)
             perc_diff_dict_p_all["perc_diff_tp_sp_site"].append(perc_diff_tp_sp_site)
-            perc_diff_dict_p_all["perc_diff_tp_sp_site_yr"].append(perc_diff_tp_sp_site_yr)
+            perc_diff_dict_p_all["perc_diff_tp_sp_site_yr"].append(
+                perc_diff_tp_sp_site_yr
+            )
 
         # remove the empty subplots
         for splot_ix in [2, 3]:
