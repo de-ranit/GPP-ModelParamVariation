@@ -20,8 +20,6 @@ import matplotlib.lines as lines
 import seaborn as sns
 import pandas as pd
 
-from palettable.colorbrewer.qualitative import Dark2_3
-
 
 # set up matplotlib to use LaTeX for rendering text
 matplotlib.rcParams["text.usetex"] = True
@@ -335,8 +333,7 @@ def plot_axs_param_dens(
         "alpha_fT_Horn": r"$\alpha_{fT}$ [-]",
     }
 
-    cols = Dark2_3.hex_colors
-    # cols = ["#E6C300", "#009E73", "#56B4E9"]
+    cols = ['#004488', '#DDAA33', '#BB5566']
 
     sns.histplot(
         x=mad_temporal,
@@ -523,8 +520,7 @@ def plot_param_variance(per_site_yr_res_path, per_site_res_path, model_name):
         per_site_yr_res_path, per_site_res_path, model_name
     )
 
-    cols = Dark2_3.hex_colors
-    # cols = ["#E6C300", "#009E73", "#56B4E9"]
+    cols = ['#004488', '#DDAA33', '#BB5566']
 
     # create a legend for the figure
     legend_elements = [
