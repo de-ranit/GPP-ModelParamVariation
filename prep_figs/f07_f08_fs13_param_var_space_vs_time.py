@@ -333,14 +333,14 @@ def plot_axs_param_dens(
         "alpha_fT_Horn": r"$\alpha_{fT}$ [-]",
     }
 
+    # set the color palette
+    # source: highcontrast (https://packages.tesselle.org/khroma/articles/tol.html)
     cols = ['#004488', '#DDAA33', '#BB5566']
 
     sns.histplot(
         x=mad_temporal,
         stat="percent",
         kde=True,
-        # kde_kws={"bw_adjust": 1.4, "cut": 4},
-        # bins=50,
         ax=axis,
         color="white",
         edgecolor="white",
@@ -520,6 +520,7 @@ def plot_param_variance(per_site_yr_res_path, per_site_res_path, model_name):
         per_site_yr_res_path, per_site_res_path, model_name
     )
 
+    # source: highcontrast https://packages.tesselle.org/khroma/articles/tol.html#high-contrast
     cols = ['#004488', '#DDAA33', '#BB5566']
 
     # create a legend for the figure

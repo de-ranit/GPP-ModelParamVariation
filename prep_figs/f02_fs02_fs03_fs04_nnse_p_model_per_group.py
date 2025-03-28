@@ -301,6 +301,8 @@ def plot_axs(
         metric_syr = metric_syr[~np.isnan(metric_syr)]
         metric_dt_nt = metric_dt_nt[~np.isnan(metric_dt_nt)]
 
+    # colors for the different groups
+    # source: muted (https://packages.tesselle.org/khroma/articles/tol.html#muted)
     cols = [
         "#CC6677",
         "#332288",
@@ -657,6 +659,7 @@ def plot_fig_main(result_paths):
     fig.supylabel("Fraction of" + r" sites [\%]", x=0.05, fontsize=36)
 
     # Adding legend manually
+    # source: muted (https://packages.tesselle.org/khroma/articles/tol.html#muted)
     colors = [
         "#CC6677",
         "#332288",

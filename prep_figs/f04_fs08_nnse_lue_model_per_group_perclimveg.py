@@ -429,6 +429,8 @@ def plot_axs(
         metric_syr = metric_syr[~np.isnan(metric_syr)]
         metric_dt_nt = metric_dt_nt[~np.isnan(metric_dt_nt)]
 
+    # color palette for the different groups
+    # source: muted (https://packages.tesselle.org/khroma/articles/tol.html#muted)
     cols = [
         "#CC6677",
         "#332288",
@@ -878,6 +880,7 @@ def plot_fig_main(result_paths):
     fig.supxlabel("NNSE [-]", y=0.03, fontsize=36)
     fig.supylabel("Fraction of" + r" sites [\%]", x=0.05, fontsize=36)
 
+    # source: muted (https://packages.tesselle.org/khroma/articles/tol.html#muted)
     colors = [
         "#CC6677",
         "#332288",
@@ -950,8 +953,12 @@ def plot_fig_main(result_paths):
 
     fig_path = Path("supplement_figs")
     os.makedirs(fig_path, exist_ok=True)
-    plt.savefig("./supplement_figs/fs08_nnse_lue_hr_climveg.png", dpi=300, bbox_inches="tight")
-    plt.savefig("./supplement_figs/fs08_nnse_lue_hr_climveg.pdf", dpi=300, bbox_inches="tight")
+    plt.savefig(
+        "./supplement_figs/fs08_nnse_lue_hr_climveg.png", dpi=300, bbox_inches="tight"
+    )
+    plt.savefig(
+        "./supplement_figs/fs08_nnse_lue_hr_climveg.pdf", dpi=300, bbox_inches="tight"
+    )
     plt.close("all")
 
     ###############################
