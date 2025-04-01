@@ -12,8 +12,8 @@
     <img alt="ZenodoDOI" src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.15089289-blue?logo=Zenodo&logoColor=white&logoSize=auto"
   ></a>
 
-  <a href="https://doi.org/10.22541/essoar.xxxxx/v1">
-    <img alt="PreprintDOI" src="https://img.shields.io/badge/Preprint_DOI-10.22541%2Fessoar.xxxxxx%2Fv1-blue"
+  <a href="https://doi.org/10.22541/essoar.174349993.30198378/v1">
+    <img alt="PreprintDOI" src="https://img.shields.io/badge/Preprint_DOI-10.22541%2Fessoar.174349993.30198378%2Fv1-blue"
   ></a>
 </p>
 
@@ -21,7 +21,7 @@
 This repository contains codes to perform analysis and reproduce figures of our research paper:
 
 ```
-De, R.,  and Carvalhais, N. (2025). Inter–annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production, ESS Open Archive, 1–xxx, https://doi.org/10.22541/xxxxxxxxxx/v1
+De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2025). Inter–annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production, ESS Open Archive, 1–38, https://doi.org/10.22541/174349993.30198378/v1
 ```
 
 This paper is a companion paper or the second part of our previous study. Further details on our methodology/ description of models can be found at:
@@ -70,11 +70,20 @@ The codes are written to be compatible with computing platforms and filestructur
 **Research paper:**
   - BibTeX
 ```
-
+@article{De_2025_paramval,
+author = {De, R. and Brenning, A. and Reichstein, M. and Šigut, L. and Ruiz Reverter, B. and Korkiakoski, M. and Paul-Limoges, E. and Blanken, P. D. and Black, T. A. and Gielen, B. and Tagesson, T. and Wohlfahrt, G. and Montagnani, L. and Wolf, S. and Chen, J. and Liddell, M. and Desai, A. R. and Koirala, S. and Carvalhais, N.},
+doi = {10.22541/essoar.174349993.30198378/v1},
+journal = {ESS Open Archive},
+note = {preprint},
+title = {{Inter--annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production}},
+url = {https://essopenarchive.org/doi/full/10.22541/essoar.174349993.30198378/v1},
+month = {apr},
+year = {2025}
+}
 ```
   - APA
 ```
-
+De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2025). Inter–annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production, ESS Open Archive, 1–38, https://doi.org/10.22541/174349993.30198378/v1
 ```
 
 **This repository:**
