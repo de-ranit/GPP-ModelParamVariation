@@ -21,7 +21,7 @@
 This repository contains codes to perform analysis and reproduce figures of our research paper:
 
 ```
-De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2025). Inter–annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production, ESS Open Archive, 1–38, https://doi.org/10.22541/174349993.30198378/v1
+De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2025). Inter–annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production, ESS Open Archive, 1–38, https://doi.org/10.22541/essoar.174349993.30198378/v1
 ```
 
 This paper is a companion paper or the second part of our previous study. Further details on our methodology/ description of models can be found at:
@@ -83,7 +83,7 @@ year = {2025}
 ```
   - APA
 ```
-De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2025). Inter–annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production, ESS Open Archive, 1–38, https://doi.org/10.22541/174349993.30198378/v1
+De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2025). Inter–annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production, ESS Open Archive, 1–38, https://doi.org/10.22541/essoar.174349993.30198378/v1
 ```
 
 **This repository:**
