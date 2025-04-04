@@ -525,9 +525,10 @@ def prep_results(ip_df_dict, model_op, settings_dict, xbest, p_names):
         opti_param_vals = get_params(ip_df_dict, p_list=p_names, p_vec=xbest)
 
         for item in p_names:
-            if (settings_dict["param_group_to_vary"] == "Group6") and (
-                settings_dict["model_name"] == "LUE_model"
-            ):
+            if (
+                settings_dict["param_group_to_vary"] == "Group6"
+                or settings_dict["param_group_to_vary"] == "Group8"
+            ) and (settings_dict["model_name"] == "LUE_model"):
                 if "_" in item:
                     item_param_name, _ = item.rsplit("_", 1)
                 else:
@@ -555,9 +556,10 @@ def prep_results(ip_df_dict, model_op, settings_dict, xbest, p_names):
                 else:
                     param_val_dict[item] = opti_param_vals[item]
 
-            elif (settings_dict["param_group_to_vary"] == "Group2") and (
-                settings_dict["model_name"] == "P_model"
-            ):
+            elif (
+                settings_dict["param_group_to_vary"] == "Group2"
+                or settings_dict["param_group_to_vary"] == "Group4"
+            ) and (settings_dict["model_name"] == "P_model"):
                 if "_" in item:
                     item_param_name, _ = item.rsplit("_", 1)
                 else:
