@@ -17,7 +17,7 @@
   ></a>
 </p>
 
-# Descriptions
+# Description
 This repository contains codes to perform analysis and reproduce figures of our research paper:
 
 ```
