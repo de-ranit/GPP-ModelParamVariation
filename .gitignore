@@ -87,6 +87,7 @@ __pycache__/
 #### don't ignore these exceptional files/folders ####
 !site_year_list.csv
 !SiteInfo_BRKsite_list.csv
+!bad_site_yr.csv
 !model_settings.xlsx
 !f01_workflow.png
 !mit_license_logo.png

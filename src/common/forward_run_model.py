@@ -12,6 +12,7 @@ first created: 2023-11-10
 import os
 from pathlib import Path
 import numpy as np
+import pandas as pd
 
 from src.p_model.run_gpp_p_acclim import run_p_model
 from src.lue_model.run_lue_model import run_lue_model
@@ -90,13 +91,24 @@ def forward_run_model(
     # get an array of unique years in a site
     unique_years_arr = np.unique(ip_df_dict["year"])
 
+    # remove bad site years from unique_years_arr
+    bad_site_yr_df = pd.read_csv("./site_info/bad_site_yr.csv", header=None)
+    bad_site_yr_list = bad_site_yr_df[0].tolist()
+    bad_site_yr_list.sort()
+
+    for yrs in unique_years_arr:
+        if ip_df_dict["SiteID"] + "_" + str(int(yrs)) in bad_site_yr_list:
+            unique_years_arr = [x for x in unique_years_arr if int(x) != int(yrs)]
+
+    unique_years_arr = np.array(unique_years_arr)
+
     # add extra parameters which will vary for each year
     param_dict, p_names_to_vary, _ = add_keys_for_group(
-        settings_dict["param_group_to_vary"],
+        settings_dict,
         params,
         unique_years_arr,
-        settings_dict["model_name"],
         ip_df_dict["KG"],
+        ip_df_dict["SiteID"],
     )
 
     if settings_dict["model_name"] == "P_model":
@@ -121,6 +133,7 @@ def forward_run_model(
             settings_dict["CO2_var"],
             settings_dict["param_group_to_vary"],
             p_names_to_vary,
+            unique_yrs_arr=unique_years_arr,
         )
 
     elif settings_dict["model_name"] == "LUE_model":
@@ -139,13 +152,13 @@ def forward_run_model(
             settings_dict["CO2_var"],
             settings_dict["param_group_to_vary"],
             p_names_to_vary,
+            unique_yrs_arr=unique_years_arr,
         )
     else:
         raise ValueError(
             f"model_name should be either P_model or LUE_model, {settings_dict['model_name']}"
             "is not implemented"
         )
-
     return model_op, opti_param_names, xbest
 
 

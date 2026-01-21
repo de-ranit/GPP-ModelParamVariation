@@ -12,12 +12,14 @@ first created: 2023-11-07
 import os
 import sys
 from pathlib import Path
+import copy
 import json
 import logging
 from functools import partial
 import re
 import cma  # development version (v 3.3.0.1)
 import numpy as np
+import pandas as pd
 
 from src.p_model.pmodel_plus import pmodel_plus
 from src.common.get_params import get_params
@@ -97,14 +99,15 @@ def get_cmaes_options(
     # https://github.com/CMA-ES/pycma/blob/master/cma/evolution_strategy.py#L415
     # accessible via cma.CMAOptions() or cma.CMAOptions('verb') or cma.CMAOptions('tol') etc.
     opts = {
+        "seed": 199340,
         "bounds": bounds,  # lower (=bounds[0])
         # and upper domain boundaries, each a scalar or a list/vector'
-        "maxiter": 500,  #'100 + 150 * (N+3)**2 // popsize**0.5  #v maximum number of iterations'
-        "maxfevals": 50000,  #'inf
+        # "maxiter": 500,  #'100 + 150 * (N+3)**2 // popsize**0.5  #v maximum number of iterations'
+        # "maxfevals": 50000,  #'inf
         # v maximum number of function evaluations'
-        "popsize": 1000,  #'4 + 3 * np.log(N)
+        # "popsize": 1000,  #'4 + 3 * np.log(N)
         # population size, AKA lambda, int(popsize) is the number of new solution per iteration'
-        "popsize_factor": 1,  # multiplier for popsize,
+        # "popsize_factor": 1,  # multiplier for popsize,
         # convenience option to increase default popsize'
         "tolx": 1e-6,  #'1e-11
         # v termination criterion: tolerance in x-changes'
@@ -175,7 +178,7 @@ def save_opti_results(opti_dict, settings_dict, append):
         json.dump(opti_dict, opti_dict_json_file, indent=4, separators=(", ", ": "))
 
 
-def add_keys_for_group(param_group, p_dict, yr_arr, model_name, kg_class):
+def add_keys_for_group(settings_dict, p_dict, yr_arr, kg_class, site_id):
     """
     This function will add extra parameters which will vary per year to
     the parameter dictionary for optimization.
@@ -194,6 +197,9 @@ def add_keys_for_group(param_group, p_dict, yr_arr, model_name, kg_class):
     selected_params (list): list of parameters which will vary per year
     coll_new_key (list): list of new parameters (i.e., param_yr) added to the dictionary
     """
+
+    param_group = settings_dict["param_group_to_vary"]
+    model_name = settings_dict["model_name"]
 
     # define parameter groups based on model
     if model_name == "P_model":
@@ -264,6 +270,14 @@ def add_keys_for_group(param_group, p_dict, yr_arr, model_name, kg_class):
             "sn_a",
             "alpha",
         ]
+    elif param_group == "Group7_fixAWC":
+        selected_params = [
+            "theta",
+            "alphaPT",
+            "meltRate_temp",
+            "meltRate_netrad",
+            "sn_a",
+        ]
     elif (param_group == "Group4") and (model_name == "P_model"):
         selected_params = [
             "W_I",
@@ -297,6 +311,99 @@ def add_keys_for_group(param_group, p_dict, yr_arr, model_name, kg_class):
 
             del p_dict[param]
 
+    p_dict = {key: copy.deepcopy(value) for key, value in p_dict.items()}
+
+    # restart calibration from previous optimization results
+    try:
+        if settings_dict["param_init_from_file"]:
+            model_res_path = Path(
+                "model_results",
+                model_name,
+                (
+                    f"{settings_dict['opti_type']}_"
+                    f"{settings_dict['data_source']}_"
+                    f"{settings_dict['fPAR_var']}_"
+                    f"{settings_dict['CO2_var']}_"
+                    f"{settings_dict['data_filtering']}_"
+                    f"{settings_dict['cost_func']}"
+                    f"_{settings_dict['append_for_prev_exp']}"
+                ),
+                "serialized_model_results",
+            )
+            opti_dict_path_filename = os.path.join(
+                model_res_path, f"{site_id}_result.npy"
+            )  # filename where optimization results are saved
+
+            res_dict = np.load(opti_dict_path_filename, allow_pickle=True).item()
+
+            for p_name in p_dict.keys():
+                if p_name in res_dict["Opti_par_val"]:
+                    if (
+                        settings_dict["param_group_to_vary"] == "Group6"
+                        or settings_dict["param_group_to_vary"] == "Group8"
+                    ) and (model_name == "LUE_model"):
+                        if "_" in p_name:
+                            item_param_name, _ = p_name.rsplit("_", 1)
+                        else:
+                            item_param_name = p_name
+
+                        if item_param_name == "K_W":
+                            p_dict[p_name]["ini"] = (
+                                res_dict["Opti_par_val"][p_name] * -1.0
+                            )  # make K_W values positive
+                        else:
+                            p_dict[p_name]["ini"] = res_dict["Opti_par_val"][p_name]
+
+                    elif (settings_dict["param_group_to_vary"] == "Group3") and (
+                        model_name == "LUE_model"
+                    ):
+                        if "_" in p_name:
+                            item_param_name, _ = p_name.rsplit("_", 1)
+                        else:
+                            item_param_name = p_name
+
+                        if item_param_name == "Kappa_VPD":
+                            p_dict[p_name]["ini"] = (
+                                res_dict["Opti_par_val"][p_name] * -1.0
+                            )  # make Kappa_VPD values positive
+                        else:
+                            p_dict[p_name]["ini"] = res_dict["Opti_par_val"][p_name]
+
+                    elif (
+                        settings_dict["param_group_to_vary"] == "Group2"
+                        or settings_dict["param_group_to_vary"] == "Group4"
+                    ) and (model_name == "P_model"):
+                        if "_" in p_name:
+                            item_param_name, _ = p_name.rsplit("_", 1)
+                        else:
+                            item_param_name = p_name
+
+                        if item_param_name == "K_W":
+                            p_dict[p_name]["ini"] = (
+                                res_dict["Opti_par_val"][p_name] * -1.0
+                            )  # make K_W values positive
+                        else:
+                            p_dict[p_name]["ini"] = res_dict["Opti_par_val"][p_name]
+
+                    elif p_name == "K_W":
+                        p_dict[p_name]["ini"] = (
+                            res_dict["Opti_par_val"][p_name] * -1.0
+                        )  # make K_W values positive
+
+                    elif p_name == "Kappa_VPD":
+                        p_dict[p_name]["ini"] = (
+                            res_dict["Opti_par_val"][p_name] * -1.0
+                        )  # make Kappa_VPD values positive
+                    else:
+                        print(p_name)
+                        print(p_dict[p_name]["ini"])
+                        p_dict[p_name]["ini"] = res_dict["Opti_par_val"][p_name]
+                        print(p_dict[p_name]["ini"])
+    except KeyError:
+        raise KeyError(
+            "param_init_from_file is set to True, but the parameter not found"
+        )
+
     return p_dict, selected_params, coll_new_key
 
 
@@ -326,14 +433,32 @@ def optimize_model(
     # get an array of unique years in a site
     unique_years_arr = np.unique(ip_df_dict["year"])
 
+    # remove bad site years from unique_years_arr
+    bad_site_yr_df = pd.read_csv("./site_info/bad_site_yr.csv", header=None)
+    bad_site_yr_list = bad_site_yr_df[0].tolist()
+    bad_site_yr_list.sort()
+
+    for yrs in unique_years_arr:
+        if ip_df_dict["SiteID"] + "_" + str(int(yrs)) in bad_site_yr_list:
+            unique_years_arr = [x for x in unique_years_arr if int(x) != int(yrs)]
+
+    if len(unique_years_arr) == 0:
+        logger.info(
+            "%s, All site years are marked as bad site years. Aborting optimization.",
+            ip_df_dict["SiteID"],
+        )
+        sys.exit(0)
+
+    unique_years_arr = np.array(unique_years_arr)
+
     # add extra parameters which will vary for each year, while other params remain
     # constant for all years
     param_dict, p_names_to_vary, yr_specific_p_names = add_keys_for_group(
-        settings_dict["param_group_to_vary"],
+        settings_dict,
         params,
         unique_years_arr,
-        settings_dict["model_name"],
         ip_df_dict["KG"],
+        ip_df_dict["SiteID"],
     )
 
     # Define costhand and parameters in case of P Model
@@ -388,6 +513,8 @@ def optimize_model(
                 consider_yearly_cost=settings_dict["cost_iav"],
                 param_group_to_vary=settings_dict["param_group_to_vary"],
                 param_names_to_vary=p_names_to_vary,
+                et_var_name=settings_dict["et_var_name"],
+                unique_yrs_arr=unique_years_arr,
             )
         else:  # in case of site year optimization
             costhand = partial(
@@ -403,6 +530,8 @@ def optimize_model(
                 data_filtering=settings_dict["data_filtering"],
                 cost_func=settings_dict["cost_func"],
                 site_year=site_year,
+                et_var_name=settings_dict["et_var_name"],
+                unique_yrs_arr=unique_years_arr,
             )
 
     # Define costhand and parameters in case of LUE Model
@@ -475,6 +604,8 @@ def optimize_model(
                 consider_yearly_cost=settings_dict["cost_iav"],
                 param_group_to_vary=settings_dict["param_group_to_vary"],
                 param_names_to_vary=p_names_to_vary,
+                et_var_name=settings_dict["et_var_name"],
+                unique_yrs_arr=unique_years_arr,
             )
 
         else:  # in case of site year optimization
@@ -491,6 +622,8 @@ def optimize_model(
                 cost_func=settings_dict["cost_func"],
                 synthetic_data=synthetic_data,
                 site_year=site_year,
+                et_var_name=settings_dict["et_var_name"],
+                unique_yrs_arr=unique_years_arr,
             )
     else:
         raise ValueError(
@@ -602,7 +735,22 @@ def optimize_model(
                 opts["bounds"] = [np.zeros(len(p_names)), np.ones(len(p_names))]
 
                 # initial guess for parameters scalar to be optimized
-                p_values_scalar = [0.5] * len(p_names)
+                p_values_scalar = np.array([1.0] * len(p_names))
+                multipliers = np.array(
+                    [ub - lb for ub, lb in zip(p_ubound_scaled, p_lbound_scaled)]
+                )
+                zero = np.array(
+                    [
+                        -lb / (ub - lb)
+                        for ub, lb in zip(p_ubound_scaled, p_lbound_scaled)
+                    ]
+                )
+                p_values_scalar = list(
+                    (p_values_scalar / multipliers) + zero
+                )  # coordinate transformed
+
+                # initial guess for parameters scalar to be optimized
+                # p_values_scalar = [0.5] * len(p_names)
 
                 # run the optimization
                 cma_es = cma.CMAEvolutionStrategy(
@@ -652,6 +800,22 @@ def optimize_model(
         #   dimension = CMAEvolutionStrategy.N and mueff =
         #   CMAEvolutionStrategy.sp.weights.mueff ~ 0.3 * popsize
         op_opti["opti_param_names"] = p_names  # list of parameters optimized
+
+        if site_year is not None:
+            logger.info(
+                "%s (%s): optimization completed in %s function evaluations, stop criteria: %s",
+                ip_df_dict["SiteID"],
+                str(int(site_year)),
+                str(op_opti["evaluations"]),
+                str(op_opti["stop"]),
+            )
+        else:
+            logger.info(
+                "%s: optimization completed in %s function evaluations, stop criteria: %s",
+                ip_df_dict["SiteID"],
+                str(op_opti["evaluations"]),
+                str(op_opti["stop"]),
+            )
 
         # if the optimization stopped due to flat fitness (can hapen depending
         # on formulation of cost function) and the site will not be optimized, log it

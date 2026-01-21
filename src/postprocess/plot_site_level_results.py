@@ -47,7 +47,9 @@ def plot_site_level_results(result_dict, ip_df_dict, settings_dict):
             bn.nanmax(result_dict["GPP_sim_daily"]),
             bn.nanmax(result_dict["GPP_sim_no_moisture_daily"]),
         )
-        gpp_d_used_data_idx = np.where(result_dict['good_gpp_d_idx'] == 1.0, max_gpp_d_val, 0.0)
+        gpp_d_used_data_idx = np.where(
+            result_dict["good_gpp_d_idx"] == 1.0, max_gpp_d_val, 0.0
+        )
 
         nse_sd_gpp_no_stress = round(
             result_dict["NSE_no_moisture_Stress"][f"NSE_{result_dict['Temp_res']}"], 3
@@ -79,7 +81,9 @@ def plot_site_level_results(result_dict, ip_df_dict, settings_dict):
             bn.nanmax(result_dict["GPP_NT_daily"]),
             bn.nanmax(result_dict["GPP_sim_daily"]),
         )
-        gpp_d_used_data_idx = np.where(result_dict['good_gpp_d_idx'] == 1.0, max_gpp_d_val, 0.0)
+        gpp_d_used_data_idx = np.where(
+            result_dict["good_gpp_d_idx"] == 1.0, max_gpp_d_val, 0.0
+        )
     else:
         raise ValueError(
             f"model_name should be either P_model or LUE_model, {settings_dict['model_name']}"
@@ -121,7 +125,7 @@ def plot_site_level_results(result_dict, ip_df_dict, settings_dict):
             f"SiteID: {result_dict['SiteID']},"
             f"PFT: {result_dict['PFT']},"
             f"KG: {result_dict['KG']},"
-            f"avg. temp.: {result_dict['avg_temp']} \u00B0C, \n"
+            f"avg. temp.: {result_dict['avg_temp']} \u00b0C, \n"
             f"avg. prec.: {result_dict['avg_precip']} {ip_df_dict['prec_unit']},"
             f"AI: {result_dict['arid_ind']}"
         ),

@@ -118,6 +118,7 @@ def run_p_model(
     co2_var_name,
     param_group_to_vary,
     param_names_to_vary,
+    unique_yrs_arr,
 ):
     """
     forward run PModel with acclimation and return GPP scaled by soil moisture stress
@@ -133,7 +134,7 @@ def run_p_model(
     fpar_var_name (str): name of fpar variable
     co2_var_name (str): name of co2 variable
     param_group_to_vary (str): parameter group to be optimized per year, while other
-                                parameters are kept constant across years in a site 
+                                parameters are kept constant across years in a site
     param_names_to_vary (list): list of parameter names to be optimized per year, while other
                                 parameters are kept constant across years in a site
 
@@ -151,8 +152,11 @@ def run_p_model(
         if (param_name == "alpha") and (ip_df_dict["KG"][0] != "B"):
             pass
         else:
+            # updated_params[param_name] = updated_params[
+            #     f"{param_name}_{int(np.unique(ip_df_dict['year'])[0])}"
+            # ]
             updated_params[param_name] = updated_params[
-                f"{param_name}_{int(np.unique(ip_df_dict['year'])[0])}"
+                f"{param_name}_{int(unique_yrs_arr[0])}"
             ]
 
     if param_group_to_vary == "Group1":
@@ -176,20 +180,29 @@ def run_p_model(
         )
 
         for yr in np.unique(resampled_time_arr):
-            yr_idx = np.where(resampled_time_arr == yr)[0]
 
-            ip_df_daily_dict = get_daily_acclim_data(
-                ip_df_dict,
-                time_info,
-                fpar_var_name,
-                co2_var_name,
-                updated_params[f"acclim_window_{int(yr)}"],
-                int(yr),
-            )
+            if yr not in unique_yrs_arr:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                hr_timestep = ip_df_dict["Time"][yr_idx]
+                dd_timestep = pd.DatetimeIndex(hr_timestep).normalize().unique()
+                ip_df_daily_nan_arr = np.full(dd_timestep.shape, np.nan)
+                for var, coll_list in ip_df_daily_dict_list.items():
+                    coll_list.append(ip_df_daily_nan_arr)
+            else:
+                yr_idx = np.where(resampled_time_arr == yr)[0]
 
-            for var, coll_list in ip_df_daily_dict_list.items():
-                if not isinstance(ip_df_daily_dict[var], float):
-                    coll_list.append(ip_df_daily_dict[var][yr_idx])
+                ip_df_daily_dict = get_daily_acclim_data(
+                    ip_df_dict,
+                    time_info,
+                    fpar_var_name,
+                    co2_var_name,
+                    updated_params[f"acclim_window_{int(yr)}"],
+                    int(yr),
+                )
+
+                for var, coll_list in ip_df_daily_dict_list.items():
+                    if not isinstance(ip_df_daily_dict[var], float):
+                        coll_list.append(ip_df_daily_dict[var][yr_idx])
 
         for var, var_list in ip_df_daily_dict_list.items():
             ip_df_daily_dict[var] = np.concatenate(var_list)
@@ -215,6 +228,7 @@ def run_p_model(
         updated_params,
         co2_var_name,
         param_group_to_vary,
+        unique_yrs_arr,
     )
 
     return p_model_acclim_fw_op

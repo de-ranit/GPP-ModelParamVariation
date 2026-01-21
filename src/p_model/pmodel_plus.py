@@ -41,13 +41,17 @@ def pmodel_plus(input_data, params, co2_var_name):
     o2_pa = params["kco"] * (1e-6) * p_pa
 
     # Michaelis-Menten constant for carboxylation (Pa)
-    kc_pa_eval_exp = (params["EaKc"] * (tair_vals - 25.0)) / ( # pylint: disable=unused-variable
+    kc_pa_eval_exp = (
+        params["EaKc"] * (tair_vals - 25.0)
+    ) / (  # pylint: disable=unused-variable
         298.15 * params["kR"] * (tair_vals + 273.15)
     )
     kc_pa_vals = params["Kc25"] * ne.evaluate("exp(kc_pa_eval_exp)")
 
     # Michaelis-Menten constant for oxygenation (Pa)
-    ko_pa_eval_exp = (params["EaKo"] * (tair_vals - 25.0)) / ( # pylint: disable=unused-variable
+    ko_pa_eval_exp = (
+        params["EaKo"] * (tair_vals - 25.0)
+    ) / (  # pylint: disable=unused-variable
         298.15 * params["kR"] * (tair_vals + 273.15)
     )
     ko_pa_vals = params["Ko25"] * ne.evaluate("exp(ko_pa_eval_exp)")
@@ -63,24 +67,28 @@ def pmodel_plus(input_data, params, co2_var_name):
 
     # Adjust photorespiratory compensation point at 25°C
     # for the pressure at given elevation
-    gammastar25 = (
-        params["gamma25"] * p_ratio
-    )
+    gammastar25 = params["gamma25"] * p_ratio
 
     # Photorespiratory compensation point (GammaStar) (Pa)
-    gamma_star_eval_exp = (params["EaGamma"] * (tair_vals - 25.0)) / ( # pylint: disable=unused-variable
+    gamma_star_eval_exp = (
+        params["EaGamma"] * (tair_vals - 25.0)
+    ) / (  # pylint: disable=unused-variable
         params["kR"] * 298.15 * (tair_vals + 273.15)
     )
     gamma_star_vals = gammastar25 * ne.evaluate("exp(gamma_star_eval_exp)")
 
     # water viscosity (η*) relative at 25°C (unitless)
-    viscosity_water_star_eval_exp = -3.719 + (580.0 / ((tair_vals + 273.15) - 138.0)) # pylint: disable=unused-variable
+    viscosity_water_star_eval_exp = -3.719 + (
+        580.0 / ((tair_vals + 273.15) - 138.0)
+    )  # pylint: disable=unused-variable
     viscosity_water_star_vals = (
         ne.evaluate("exp(viscosity_water_star_eval_exp)") / 0.911
     )
 
     # Sensitivity of χ (ci/ca) to vapor pressure deficit (Pa^(1/2))
-    xi_pa_eval_exp = (params["beta"] * (km_pa_vals + gamma_star_vals)) / ( # pylint: disable=unused-variable
+    xi_pa_eval_exp = (
+        params["beta"] * (km_pa_vals + gamma_star_vals)
+    ) / (  # pylint: disable=unused-variable
         1.6 * viscosity_water_star_vals
     )
     xi_pa_vals = ne.evaluate("sqrt(xi_pa_eval_exp)")
@@ -101,7 +109,7 @@ def pmodel_plus(input_data, params, co2_var_name):
     )
 
     # Maximum rate of carboxylation (µmol CO2 m−2 s−1)
-    vc_max_eval_exp = 1.0 - ( # pylint: disable=unused-variable
+    vc_max_eval_exp = 1.0 - (  # pylint: disable=unused-variable
         (params["c"] * (ci_vals + 2.0 * gamma_star_vals)) / (ci_vals - gamma_star_vals)
     ) ** (2.0 / 3.0)
     vc_max_p_model_vals = (
@@ -117,7 +125,7 @@ def pmodel_plus(input_data, params, co2_var_name):
     )
 
     # Maximum rate of electron transport (µmol electrons m−2 s−1)
-    j_max_eval_exp = ( # pylint: disable=unused-variable
+    j_max_eval_exp = (  # pylint: disable=unused-variable
         1.0
         / (
             1.0
@@ -135,7 +143,9 @@ def pmodel_plus(input_data, params, co2_var_name):
     # zero values of j_max_vals, will produce runtime warning and nan values in j_vals,
     # suppress runtime warning, then replace nan in j_vals with 0.0, when Iabs is 0.0 (during night)
     with np.errstate(divide="ignore", invalid="ignore"):
-        j_eval_exp = 1.0 + ((4.0 * phi0_vals * i_abs_vals) / j_max_vals) ** 2.0 # pylint: disable=unused-variable
+        j_eval_exp = (
+            1.0 + ((4.0 * phi0_vals * i_abs_vals) / j_max_vals) ** 2.0
+        )  # pylint: disable=unused-variable
         j_vals = (4.0 * phi0_vals * i_abs_vals) / ne.evaluate("sqrt(j_eval_exp)")
 
     # if Iabs is zero, then j_vals is zero

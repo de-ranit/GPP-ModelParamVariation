@@ -8,6 +8,7 @@ author: rde
 first created: 2023-11-07
 
 """
+import sys
 import warnings
 import logging
 import numpy as np
@@ -27,6 +28,7 @@ def filter_data(
     co2_var_name,
     time_info=None,
     site_year=None,
+    et_var_name="ET",
 ):
     """
     filter bad quailty data, data gaps before calculating cost function or
@@ -102,14 +104,14 @@ def filter_data(
         # remove nan ET_obs, ET_sim, ET_RANDUNC,
         # as cost function can't be calculated for these points
         et_nan_indices = (
-            np.isnan(ip_df_dict["ET"])
+            np.isnan(ip_df_dict[et_var_name])
             | np.isnan(ip_df_dict["ET_RANDUNC"])
             # | np.isnan(p_model_acclim_fw_op["wai_results"]["et"])
             | np.isnan(p_model_acclim_fw_op["wai_results"]["etsno"])
         )
         # bad quality ETobs when LE_QC:  0.0 = bad; 0.5 = medium; 1.0 = good
         bad_et_obs_indices = (ip_df_dict["LE_QC"] == 0.0) | (ip_df_dict["LE_QC"] == 0.5)
-        # negative_obs_et_indices = (ip_df_dict["ET"] < 0.0) | (
+        # negative_obs_et_indices = (ip_df_dict[et_var_name] < 0.0) | (
         #     p_model_acclim_fw_op["wai_results"]["et"] < 0.0
         # )  # remove negative et_obs and et_sim
 
@@ -118,7 +120,9 @@ def filter_data(
             et_nan_indices | bad_et_obs_indices
         )  # | negative_obs_et_indices
 
-    else:  # data_filtering == "strict" only use good quality observed data, drop anything else
+    elif (
+        data_filtering == "strict"
+    ):  # data_filtering == "strict" only use good quality observed data, drop anything else
         # remove nan GPP_obs, GPP_sim, NEE_RANDUNC,
         # as cost function can't be calculated for these points
         gpp_nan_indices = (
@@ -171,14 +175,14 @@ def filter_data(
         # remove nan ET_obs, ET_sim, ET_RANDUNC,
         # as cost function can't be calculated for these points
         et_nan_indices = (
-            np.isnan(ip_df_dict["ET"])
+            np.isnan(ip_df_dict[et_var_name])
             | np.isnan(ip_df_dict["ET_RANDUNC"])
             # | np.isnan(p_model_acclim_fw_op["wai_results"]["et"])
             | np.isnan(p_model_acclim_fw_op["wai_results"]["etsno"])
         )
         # bad quality ETobs when LE_QC:  0.0 = bad; 0.5 = medium; 1.0 = good
         bad_et_obs_indices = (ip_df_dict["LE_QC"] == 0.0) | (ip_df_dict["LE_QC"] == 0.5)
-        # negative_obs_et_indices = (ip_df_dict["ET"] < 0.0) | (
+        # negative_obs_et_indices = (ip_df_dict[et_var_name] < 0.0) | (
         #     p_model_acclim_fw_op["wai_results"]["et"] < 0.0
         # )  # remove negative et_obs and et_sim
         netrad_fill_indices = (ip_df_dict["NETRAD_FILL_FLAG"] == 1.0) | (
@@ -200,6 +204,8 @@ def filter_data(
             | ta_fill_indices
             | p_fill_indices
         )  # | negative_obs_et_indices
+    else:
+        sys.exit("data_filtering must be one of: nominal, strict")
 
     if site_year is None:
         # filter data based on drop_indices and get the arrays to be used in cost function
@@ -207,7 +213,7 @@ def filter_data(
         gpp_sim = p_model_acclim_fw_op["GPPp_opt_fW"][~drop_gpp_data_indices]
         nee_unc = ip_df_dict["NEE_RANDUNC"][~drop_gpp_data_indices]
 
-        et_obs = ip_df_dict["ET"][~drop_et_data_indices]
+        et_obs = ip_df_dict[et_var_name][~drop_et_data_indices]
         # et_sim = p_model_acclim_fw_op["wai_results"]["et"][~drop_et_data_indices]
         et_sim = p_model_acclim_fw_op["wai_results"]["etsno"][~drop_et_data_indices]
         et_unc = ip_df_dict["ET_RANDUNC"][~drop_et_data_indices]
@@ -235,7 +241,7 @@ def filter_data(
             ~drop_gpp_data_indices & (ip_df_dict["year"] == site_year)
         ]
 
-        et_obs = ip_df_dict["ET"][
+        et_obs = ip_df_dict[et_var_name][
             ~drop_et_data_indices & (ip_df_dict["year"] == site_year)
         ]
         # et_sim = p_model_acclim_fw_op["wai_results"]["et"][
@@ -486,6 +492,8 @@ def p_model_cost_function(
     consider_yearly_cost=False,
     param_group_to_vary=None,
     param_names_to_vary=None,
+    et_var_name="ET",
+    unique_yrs_arr=None,
 ):
     """
     calculate cost function for GPP and ET components
@@ -508,7 +516,7 @@ def p_model_cost_function(
     site_year (float): year of data to be used for optimization
                        (only used when optimizing each year separately)
     consider_yearly_cost (bool): whether to consider an additional constraint on IAV of GPP
-    param_group_to_vary (str): parameter group to be optimized per year, while other 
+    param_group_to_vary (str): parameter group to be optimized per year, while other
                                 parameters are kept constant across years in a site
     param_names_to_vary (list): list of parameter names to be optimized per year, while other
                                 parameters are kept constant across years in a site
@@ -531,6 +539,7 @@ def p_model_cost_function(
         co2_var_name,
         param_group_to_vary,
         param_names_to_vary,
+        unique_yrs_arr,
     )
     # get filtered data for calculating cost function
     if site_year is None:  # all year optimization
@@ -549,6 +558,7 @@ def p_model_cost_function(
             data_filtering,
             co2_var_name,
             time_info,
+            et_var_name=et_var_name,
         )
     else:  # site year optimization
         gpp_obs, gpp_sim, nee_unc, et_obs, et_sim, et_unc, *_ = filter_data(
@@ -558,6 +568,7 @@ def p_model_cost_function(
             co2_var_name,
             time_info,
             site_year,
+            et_var_name=et_var_name,
         )
 
     if (gpp_obs.size == 0) or (

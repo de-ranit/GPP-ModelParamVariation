@@ -423,6 +423,8 @@ def main():
                         "the model_settings.xlsx file when `eval_mode` is `sequence`"
                     )
                 )
+            # site_idx_ = int(sys.argv[1]) - 1
+            # main_script_optimize(site_idx_, site_id_list, model_settings)
         else:
             raise ValueError(
                 "eval_mode must be one of: parallel, sequence, when run_mode is optim"

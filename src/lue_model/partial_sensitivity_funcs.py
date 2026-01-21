@@ -12,6 +12,7 @@ first created: Sat Dec 23 2023 17:20:29 CET
 import numpy as np
 import numexpr as ne
 
+
 def f_temp_horn(temp, t_opt, k_t, alpha_ft):
     """
     calculate partial sensitivity function for temperature
@@ -125,7 +126,7 @@ def f_water_horn(wai_nor, w_i, k_w, alpha):
             w_f[idx] = (1.0 - alpha) * wai_nor_val + alpha * wai_nor_val
         else:
             w_f[idx] = (1.0 - alpha) * wai_nor_val + alpha * w_f[idx - lag_step]
-    
+
     fw_eval_exp = k_w * (w_f - w_i)  # pylint: disable=unused-variable
     fw_horn = 1.0 / (1.0 + ne.evaluate("exp(fw_eval_exp)"))  # calculate fw_Horn
 
@@ -165,9 +166,9 @@ def f_cloud_index_exp(mu_fci, sw_in=None, sw_in_pot=None, ci=None):
     sw_in (array): incoming shortwave radiation (W m-2)
     sw_in_pot (array): potential incoming shortwave radiation (W m-2)
     ci (array): cloudiness index (dimensionless)
-    
+
     either ci or sw_in and sw_in_pot should be provided to calculate fCI
-    
+
     returns:
     fci (array): partial sensitivity function values for cloudiness index
     ci (array): cloudiness index (dimensionless)
@@ -192,7 +193,7 @@ def f_cloud_index_exp(mu_fci, sw_in=None, sw_in_pot=None, ci=None):
     # when ci is supplied, it can be directly used to calculate fCI
     elif ci is not None:
         pass
-    else: # when ci is not supplied and sw_in and sw_in_pot are also not supplied
+    else:  # when ci is not supplied and sw_in and sw_in_pot are also not supplied
         raise ValueError(
             "Either ci or sw_in and sw_in_pot should be provided to calculate fCI"
         )

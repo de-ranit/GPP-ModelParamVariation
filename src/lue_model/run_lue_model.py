@@ -21,6 +21,14 @@ from src.lue_model.partial_sensitivity_funcs import (
 )
 
 
+def split_arr_into_nan_and_val_arr(arr):
+    isnan = np.isnan(arr)
+    # compute split positions: boundaries are where change occurs +1 (except first)
+    boundaries = np.where(np.diff(isnan.astype(int)) != 0)[0] + 1
+    splitted_arrs = np.split(arr, boundaries)
+    return splitted_arrs
+
+
 def run_lue_model(
     param_values_scalar,
     param_names,
@@ -32,6 +40,7 @@ def run_lue_model(
     co2_var_name,
     param_group_to_vary,
     param_names_to_vary,
+    unique_yrs_arr,
 ):
     """
     Calculate partial sensitivity functions and simulate GPP using the LUE model
@@ -67,8 +76,11 @@ def run_lue_model(
         elif (param_name == "alpha") and (ip_df_dict["KG"][0] != "B"):
             pass
         else:
+            # updated_params[param_name] = updated_params[
+            #     f"{param_name}_{int(np.unique(ip_df_dict['year'])[0])}"
+            # ]
             updated_params[param_name] = updated_params[
-                f"{param_name}_{int(np.unique(ip_df_dict['year'])[0])}"
+                f"{param_name}_{int(unique_yrs_arr[0])}"
             ]
 
     # if WAI parameters are varying per year, calculate WAI for each years
@@ -79,49 +91,60 @@ def run_lue_model(
             wai_op_dict_list[var] = []
 
         for yr in np.unique(ip_df_dict["year"]):
-            yr_idx = np.where(ip_df_dict["year"] == yr)[0]
 
-            updated_params["AWC"] = updated_params[f"AWC_{int(yr)}"]
-            updated_params["theta"] = updated_params[f"theta_{int(yr)}"]
-            updated_params["alphaPT"] = updated_params[f"alphaPT_{int(yr)}"]
-            updated_params["meltRate_temp"] = updated_params[f"meltRate_temp_{int(yr)}"]
-            updated_params["meltRate_netrad"] = updated_params[
-                f"meltRate_netrad_{int(yr)}"
-            ]
+            if yr not in unique_yrs_arr:
 
-            # calculate WAI
-            # first do spinup for calculation of wai using daily data
-            # (for faster spinup loops when actual simulations are sub daily)
-            wai_results = calc_wai(
-                ip_df_daily_wai,
-                wai_output,
-                updated_params,
-                wai0=updated_params["AWC"],
-                nloops=updated_params["nloop_wai_spin"],
-                spinup=True,
-                do_snow=True,
-                normalize_wai=False,
-                do_sublimation=True,
-                nstepsday=nstepsday,
-            )
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                wai_nan_arr = np.full(yr_idx.shape, np.nan)
+                for _, var_empty_list in wai_op_dict_list.items():
+                    var_empty_list.append(wai_nan_arr)
 
-            # then when steady state is achieved (after 5 spinup loops),
-            # do the actual calculation of wai using subdaily/daily data
-            wai_results = calc_wai(
-                ip_df_dict,
-                wai_results,
-                updated_params,
-                wai0=wai_results["wai"][-1],
-                nloops=updated_params["nloop_wai_act"],
-                spinup=False,
-                do_snow=True,
-                normalize_wai=True,
-                do_sublimation=True,
-                nstepsday=nstepsday,
-            )
+            else:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
 
-            for var, var_empty_list in wai_op_dict_list.items():
-                var_empty_list.append(wai_results[var][yr_idx])
+                updated_params["AWC"] = updated_params[f"AWC_{int(yr)}"]
+                updated_params["theta"] = updated_params[f"theta_{int(yr)}"]
+                updated_params["alphaPT"] = updated_params[f"alphaPT_{int(yr)}"]
+                updated_params["meltRate_temp"] = updated_params[
+                    f"meltRate_temp_{int(yr)}"
+                ]
+                updated_params["meltRate_netrad"] = updated_params[
+                    f"meltRate_netrad_{int(yr)}"
+                ]
+
+                # calculate WAI
+                # first do spinup for calculation of wai using daily data
+                # (for faster spinup loops when actual simulations are sub daily)
+                wai_results = calc_wai(
+                    ip_df_daily_wai,
+                    wai_output,
+                    updated_params,
+                    wai0=updated_params["AWC"],
+                    nloops=updated_params["nloop_wai_spin"],
+                    spinup=True,
+                    do_snow=True,
+                    normalize_wai=False,
+                    do_sublimation=True,
+                    nstepsday=nstepsday,
+                )
+
+                # then when steady state is achieved (after 5 spinup loops),
+                # do the actual calculation of wai using subdaily/daily data
+                wai_results = calc_wai(
+                    ip_df_dict,
+                    wai_results,
+                    updated_params,
+                    wai0=wai_results["wai"][-1],
+                    nloops=updated_params["nloop_wai_act"],
+                    spinup=False,
+                    do_snow=True,
+                    normalize_wai=True,
+                    do_sublimation=True,
+                    nstepsday=nstepsday,
+                )
+
+                for var, var_empty_list in wai_op_dict_list.items():
+                    var_empty_list.append(wai_results[var][yr_idx])
 
         for var, var_list in wai_op_dict_list.items():
             wai_output[var] = np.concatenate(var_list)
@@ -177,12 +200,22 @@ def run_lue_model(
     )
 
     # calculate sensitivity function for soil moisture
-    f_water = f_water_horn(
-        wai_results["wai_nor"],
-        updated_params["W_I"],
-        updated_params["K_W"],
-        updated_params["alpha"],
-    )
+    # handle gap in WAI data - gaps are introduced when g07 is calibrated
+    splitted_wai_arrs = split_arr_into_nan_and_val_arr(wai_results["wai_nor"])
+    collect_f_water_arrs = []
+    for wai_arr in splitted_wai_arrs:
+        if np.isnan(wai_arr).all():
+            f_water_arr = wai_arr
+            collect_f_water_arrs.append(f_water_arr)
+        else:
+            f_water_arr = f_water_horn(
+                wai_arr,
+                updated_params["W_I"],
+                updated_params["K_W"],
+                updated_params["alpha"],
+            )
+            collect_f_water_arrs.append(f_water_arr)
+    f_water = np.concatenate(collect_f_water_arrs)
 
     # calculate sensitivity function for light scalar
     f_light = f_light_scalar_tal(
@@ -203,44 +236,58 @@ def run_lue_model(
     if param_group_to_vary == "Group1":
         gpp_lue_list = []
         for yr in np.unique(ip_df_dict["year"]):
-            yr_idx = np.where(ip_df_dict["year"] == yr)[0]
 
-            gpp_lue_yr = (
-                updated_params[f"LUE_max_{int(yr)}"]
-                * f_tair[yr_idx]
-                * f_vpd_co2[yr_idx]
-                * f_water[yr_idx]
-                * f_light[yr_idx]
-                * f_cloud[yr_idx]
-            ) * (ip_df_dict["PPFD_IN_GF"][yr_idx] * ip_df_dict[fpar_var_name][yr_idx])
+            if yr not in unique_yrs_arr:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                gpp_lue_yr = np.full(yr_idx.shape, np.nan)
+                gpp_lue_list.append(gpp_lue_yr)
+            else:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
 
-            gpp_lue_list.append(gpp_lue_yr)
+                gpp_lue_yr = (
+                    updated_params[f"LUE_max_{int(yr)}"]
+                    * f_tair[yr_idx]
+                    * f_vpd_co2[yr_idx]
+                    * f_water[yr_idx]
+                    * f_light[yr_idx]
+                    * f_cloud[yr_idx]
+                ) * (
+                    ip_df_dict["PPFD_IN_GF"][yr_idx] * ip_df_dict[fpar_var_name][yr_idx]
+                )
+
+                gpp_lue_list.append(gpp_lue_yr)
         gpp_lue = np.concatenate(gpp_lue_list)
 
     elif param_group_to_vary == "Group2":
         f_tair_list = []
         for yr in np.unique(ip_df_dict["year"]):
-            yr_idx = np.where(ip_df_dict["year"] == yr)[0]
-            ta_ts = ip_df_dict["TA_GF"][yr_idx]
 
-            if ip_df_dict["KG"][0] not in ["C", "D", "E"]:
-                # calculate sensitivity function for temperature
-                f_tair_yr = f_temp_horn(
-                    ta_ts,
-                    updated_params[f"T_opt_{int(yr)}"],
-                    updated_params[f"K_T_{int(yr)}"],
-                    updated_params["alpha_fT_Horn"],
-                )
+            if yr not in unique_yrs_arr:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                f_tair_yr = np.full(yr_idx.shape, np.nan)
+                f_tair_list.append(f_tair_yr)
             else:
-                # calculate sensitivity function for temperature
-                f_tair_yr = f_temp_horn(
-                    ta_ts,
-                    updated_params[f"T_opt_{int(yr)}"],
-                    updated_params[f"K_T_{int(yr)}"],
-                    updated_params[f"alpha_fT_Horn_{int(yr)}"],
-                )
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                ta_ts = ip_df_dict["TA_GF"][yr_idx]
 
-            f_tair_list.append(f_tair_yr)
+                if ip_df_dict["KG"][0] not in ["C", "D", "E"]:
+                    # calculate sensitivity function for temperature
+                    f_tair_yr = f_temp_horn(
+                        ta_ts,
+                        updated_params[f"T_opt_{int(yr)}"],
+                        updated_params[f"K_T_{int(yr)}"],
+                        updated_params["alpha_fT_Horn"],
+                    )
+                else:
+                    # calculate sensitivity function for temperature
+                    f_tair_yr = f_temp_horn(
+                        ta_ts,
+                        updated_params[f"T_opt_{int(yr)}"],
+                        updated_params[f"K_T_{int(yr)}"],
+                        updated_params[f"alpha_fT_Horn_{int(yr)}"],
+                    )
+
+                f_tair_list.append(f_tair_yr)
         f_tair = np.concatenate(f_tair_list)
 
     elif param_group_to_vary == "Group3":
@@ -248,23 +295,31 @@ def run_lue_model(
         f_vpd_part_list = []
         f_co2_part_list = []
         for yr in np.unique(ip_df_dict["year"]):
-            yr_idx = np.where(ip_df_dict["year"] == yr)[0]
-            vpd_ts = ip_df_dict["VPD_GF"][yr_idx]
-            co2_ts = ip_df_dict[co2_var_name][yr_idx]
 
-            # calculate sensitivity function for VPD
-            f_vpd_co2, f_vpd_part, f_co2_part = f_vpd_co2_preles(
-                vpd_ts,
-                co2_ts,
-                updated_params[f"Kappa_VPD_{int(yr)}"],
-                updated_params[f"Ca_0_{int(yr)}"],
-                updated_params[f"C_Kappa_{int(yr)}"],
-                updated_params[f"c_m_{int(yr)}"],
-            )
+            if yr not in unique_yrs_arr:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                f_vpd_co2 = np.full(yr_idx.shape, np.nan)
+                f_vpd_co2_list.append(f_vpd_co2)
+                f_vpd_part_list.append(f_vpd_co2)
+                f_co2_part_list.append(f_vpd_co2)
+            else:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                vpd_ts = ip_df_dict["VPD_GF"][yr_idx]
+                co2_ts = ip_df_dict[co2_var_name][yr_idx]
 
-            f_vpd_co2_list.append(f_vpd_co2)
-            f_vpd_part_list.append(f_vpd_part)
-            f_co2_part_list.append(f_co2_part)
+                # calculate sensitivity function for VPD
+                f_vpd_co2, f_vpd_part, f_co2_part = f_vpd_co2_preles(
+                    vpd_ts,
+                    co2_ts,
+                    updated_params[f"Kappa_VPD_{int(yr)}"],
+                    updated_params[f"Ca_0_{int(yr)}"],
+                    updated_params[f"C_Kappa_{int(yr)}"],
+                    updated_params[f"c_m_{int(yr)}"],
+                )
+
+                f_vpd_co2_list.append(f_vpd_co2)
+                f_vpd_part_list.append(f_vpd_part)
+                f_co2_part_list.append(f_co2_part)
         f_vpd_co2 = np.concatenate(f_vpd_co2_list)
         f_vpd_part = np.concatenate(f_vpd_part_list)
         f_co2_part = np.concatenate(f_co2_part_list)
@@ -272,64 +327,81 @@ def run_lue_model(
     elif param_group_to_vary == "Group4":
         f_light_list = []
         for yr in np.unique(ip_df_dict["year"]):
-            yr_idx = np.where(ip_df_dict["year"] == yr)[0]
-            fpar_ts = ip_df_dict[fpar_var_name][yr_idx]
-            ppfd_ts = ip_df_dict["PPFD_IN_GF"][yr_idx]
+            if yr not in unique_yrs_arr:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                f_light = np.full(yr_idx.shape, np.nan)
+                f_light_list.append(f_light)
+            else:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                fpar_ts = ip_df_dict[fpar_var_name][yr_idx]
+                ppfd_ts = ip_df_dict["PPFD_IN_GF"][yr_idx]
 
-            # calculate sensitivity function for light scalar
-            f_light = f_light_scalar_tal(
-                fpar_ts,
-                ppfd_ts,
-                updated_params[f"gamma_fL_TAL_{int(yr)}"],
-            )
+                # calculate sensitivity function for light scalar
+                f_light = f_light_scalar_tal(
+                    fpar_ts,
+                    ppfd_ts,
+                    updated_params[f"gamma_fL_TAL_{int(yr)}"],
+                )
 
-            f_light_list.append(f_light)
+                f_light_list.append(f_light)
+
         f_light = np.concatenate(f_light_list)
 
     elif param_group_to_vary == "Group5":
         f_cloud_list = []
         ci_list = []
         for yr in np.unique(ip_df_dict["year"]):
-            yr_idx = np.where(ip_df_dict["year"] == yr)[0]
-            sw_in_ts = ip_df_dict["SW_IN_GF"][yr_idx]
-            sw_in_pot_ts = ip_df_dict["SW_IN_POT_ONEFlux"][yr_idx]
+            if yr not in unique_yrs_arr:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                f_cloud = np.full(yr_idx.shape, np.nan)
+                f_cloud_list.append(f_cloud)
+                ci_list.append(f_cloud)
+            else:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                sw_in_ts = ip_df_dict["SW_IN_GF"][yr_idx]
+                sw_in_pot_ts = ip_df_dict["SW_IN_POT_ONEFlux"][yr_idx]
 
-            # calculate sensitivity function for cloudiness index
-            f_cloud, ci = f_cloud_index_exp(
-                mu_fci=updated_params[f"mu_fCI_{int(yr)}"],
-                sw_in=sw_in_ts,
-                sw_in_pot=sw_in_pot_ts,
-            )
+                # calculate sensitivity function for cloudiness index
+                f_cloud, ci = f_cloud_index_exp(
+                    mu_fci=updated_params[f"mu_fCI_{int(yr)}"],
+                    sw_in=sw_in_ts,
+                    sw_in_pot=sw_in_pot_ts,
+                )
 
-            f_cloud_list.append(f_cloud)
-            ci_list.append(ci)
+                f_cloud_list.append(f_cloud)
+                ci_list.append(ci)
         f_cloud = np.concatenate(f_cloud_list)
         ci = np.concatenate(ci_list)
 
     elif (param_group_to_vary == "Group6") or (param_group_to_vary == "Group8"):
         f_water_list = []
         for yr in np.unique(ip_df_dict["year"]):
-            yr_idx = np.where(ip_df_dict["year"] == yr)[0]
-            wai_ts = wai_results["wai_nor"][yr_idx]
-
-            if ip_df_dict["KG"][0] != "B":
-                # calculate sensitivity function for soil moisture
-                f_water = f_water_horn(
-                    wai_ts,
-                    updated_params[f"W_I_{int(yr)}"],
-                    updated_params[f"K_W_{int(yr)}"],
-                    updated_params["alpha"],
-                )
+            if yr not in unique_yrs_arr:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                f_water = np.full(yr_idx.shape, np.nan)
+                f_water_list.append(f_water)
             else:
-                # calculate sensitivity function for soil moisture
-                f_water = f_water_horn(
-                    wai_ts,
-                    updated_params[f"W_I_{int(yr)}"],
-                    updated_params[f"K_W_{int(yr)}"],
-                    updated_params[f"alpha_{int(yr)}"],
-                )
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                wai_ts = wai_results["wai_nor"][yr_idx]
 
-            f_water_list.append(f_water)
+                if ip_df_dict["KG"][0] != "B":
+                    # calculate sensitivity function for soil moisture
+                    f_water = f_water_horn(
+                        wai_ts,
+                        updated_params[f"W_I_{int(yr)}"],
+                        updated_params[f"K_W_{int(yr)}"],
+                        updated_params["alpha"],
+                    )
+                else:
+                    # calculate sensitivity function for soil moisture
+                    f_water = f_water_horn(
+                        wai_ts,
+                        updated_params[f"W_I_{int(yr)}"],
+                        updated_params[f"K_W_{int(yr)}"],
+                        updated_params[f"alpha_{int(yr)}"],
+                    )
+
+                f_water_list.append(f_water)
         f_water = np.concatenate(f_water_list)
 
     if param_group_to_vary != "Group1":

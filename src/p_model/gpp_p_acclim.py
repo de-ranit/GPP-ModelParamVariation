@@ -15,6 +15,14 @@ from src.p_model.pmodel_plus import pmodel_plus
 from src.common.wai import calc_wai
 
 
+def split_arr_into_nan_and_val_arr(arr):
+    isnan = np.isnan(arr)
+    # compute split positions: boundaries are where change occurs +1 (except first)
+    boundaries = np.where(np.diff(isnan.astype(int)) != 0)[0] + 1
+    splitted_arrs = np.split(arr, boundaries)
+    return splitted_arrs
+
+
 def rep_sd(a, nstepsday):
     """
     copy the average noon values to all the timesteps (nstepsday) in a day
@@ -96,6 +104,7 @@ def gpp_p_acclim(
     params,
     co2_var_name,
     param_group_to_vary,
+    unique_yrs_arr,
 ):
     """
     Calculate GPPp with acclimation
@@ -255,47 +264,56 @@ def gpp_p_acclim(
             wai_op_dict_list[var] = []
 
         for yr in np.unique(ip_df_dict["year"]):
-            yr_idx = np.where(ip_df_dict["year"] == yr)[0]
 
-            params["AWC"] = params[f"AWC_{int(yr)}"]
-            params["theta"] = params[f"theta_{int(yr)}"]
-            params["alphaPT"] = params[f"alphaPT_{int(yr)}"]
-            params["meltRate_temp"] = params[f"meltRate_temp_{int(yr)}"]
-            params["meltRate_netrad"] = params[f"meltRate_netrad_{int(yr)}"]
+            if yr not in unique_yrs_arr:
 
-            # calculate WAI
-            # first do spinup for calculation of wai using daily data
-            # (for faster spinup loops when actual simulations are sub daily)
-            wai_results = calc_wai(
-                ip_df_daily_wai,
-                wai_results,
-                params,
-                wai0=params["AWC"],
-                nloops=params["nloop_wai_spin"],
-                spinup=True,
-                do_snow=True,
-                normalize_wai=False,
-                do_sublimation=True,
-                nstepsday=nstepsday,
-            )
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                wai_nan_arr = np.full(yr_idx.shape, np.nan)
+                for _, var_empty_list in wai_op_dict_list.items():
+                    var_empty_list.append(wai_nan_arr)
 
-            # then when steady state is achieved (after 5 spinup loops),
-            # do the actual calculation of wai using subdaily/daily data
-            wai_results = calc_wai(
-                ip_df_dict,
-                wai_results,
-                params,
-                wai0=wai_results["wai"][-1],
-                nloops=params["nloop_wai_act"],
-                spinup=False,
-                do_snow=True,
-                normalize_wai=True,
-                do_sublimation=True,
-                nstepsday=nstepsday,
-            )
+            else:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
 
-            for var, var_empty_list in wai_op_dict_list.items():
-                var_empty_list.append(wai_results[var][yr_idx])
+                params["AWC"] = params[f"AWC_{int(yr)}"]
+                params["theta"] = params[f"theta_{int(yr)}"]
+                params["alphaPT"] = params[f"alphaPT_{int(yr)}"]
+                params["meltRate_temp"] = params[f"meltRate_temp_{int(yr)}"]
+                params["meltRate_netrad"] = params[f"meltRate_netrad_{int(yr)}"]
+
+                # calculate WAI
+                # first do spinup for calculation of wai using daily data
+                # (for faster spinup loops when actual simulations are sub daily)
+                wai_results = calc_wai(
+                    ip_df_daily_wai,
+                    wai_results,
+                    params,
+                    wai0=params["AWC"],
+                    nloops=params["nloop_wai_spin"],
+                    spinup=True,
+                    do_snow=True,
+                    normalize_wai=False,
+                    do_sublimation=True,
+                    nstepsday=nstepsday,
+                )
+
+                # then when steady state is achieved (after 5 spinup loops),
+                # do the actual calculation of wai using subdaily/daily data
+                wai_results = calc_wai(
+                    ip_df_dict,
+                    wai_results,
+                    params,
+                    wai0=wai_results["wai"][-1],
+                    nloops=params["nloop_wai_act"],
+                    spinup=False,
+                    do_snow=True,
+                    normalize_wai=True,
+                    do_sublimation=True,
+                    nstepsday=nstepsday,
+                )
+
+                for var, var_empty_list in wai_op_dict_list.items():
+                    var_empty_list.append(wai_results[var][yr_idx])
 
         for var, var_list in wai_op_dict_list.items():
             wai_results[var] = np.concatenate(var_list)
@@ -333,36 +351,52 @@ def gpp_p_acclim(
     if (param_group_to_vary == "Group2") or (param_group_to_vary == "Group4"):
         f_water_list = []
         for yr in np.unique(ip_df_dict["year"]):
-            yr_idx = np.where(ip_df_dict["year"] == yr)[0]
-            wai_ts = wai_results["wai_nor"][yr_idx]
-
-            if ip_df_dict["KG"][0] != "B":
-                # calculate sensitivity function for soil moisture
-                f_water = fw_horn(
-                    wai_ts,
-                    params[f"W_I_{int(yr)}"],
-                    params[f"K_W_{int(yr)}"],
-                    params["alpha"],
-                )
+            if yr not in unique_yrs_arr:
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                f_water = np.full(yr_idx.shape, np.nan)
+                f_water_list.append(f_water)
             else:
-                # calculate sensitivity function for soil moisture
-                f_water = fw_horn(
-                    wai_ts,
-                    params[f"W_I_{int(yr)}"],
-                    params[f"K_W_{int(yr)}"],
-                    params[f"alpha_{int(yr)}"],
-                )
+                yr_idx = np.where(ip_df_dict["year"] == yr)[0]
+                wai_ts = wai_results["wai_nor"][yr_idx]
 
-            f_water_list.append(f_water)
+                if ip_df_dict["KG"][0] != "B":
+                    # calculate sensitivity function for soil moisture
+                    f_water = fw_horn(
+                        wai_ts,
+                        params[f"W_I_{int(yr)}"],
+                        params[f"K_W_{int(yr)}"],
+                        params["alpha"],
+                    )
+                else:
+                    # calculate sensitivity function for soil moisture
+                    f_water = fw_horn(
+                        wai_ts,
+                        params[f"W_I_{int(yr)}"],
+                        params[f"K_W_{int(yr)}"],
+                        params[f"alpha_{int(yr)}"],
+                    )
+
+                f_water_list.append(f_water)
         fw = np.concatenate(f_water_list)
     else:
-        # calculate sensitivity function for moisture stress
-        fw = fw_horn(
-            wai_results["wai_nor"],
-            w_i=params["W_I"],
-            k_w=params["K_W"],
-            alpha=params["alpha"],
-        )
+        # calculate sensitivity function for soil moisture
+        # handle gap in WAI data - gaps are introduced when g07 is calibrated
+        splitted_wai_arrs = split_arr_into_nan_and_val_arr(wai_results["wai_nor"])
+        collect_f_water_arrs = []
+
+        for wai_arr in splitted_wai_arrs:
+            if np.isnan(wai_arr).all():
+                f_water_arr = wai_arr
+                collect_f_water_arrs.append(f_water_arr)
+            else:
+                f_water_arr = fw_horn(
+                    wai_arr,
+                    params["W_I"],
+                    params["K_W"],
+                    params["alpha"],
+                )
+                collect_f_water_arrs.append(f_water_arr)
+        fw = np.concatenate(collect_f_water_arrs)
 
     wai_results["fW"] = fw
 
