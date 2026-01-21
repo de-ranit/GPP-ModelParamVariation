@@ -5,7 +5,7 @@ authors:
   given-names: "Ranit"
   orcid: "https://orcid.org/0000-0003-4362-0106"
 title: "Scripts for analyses presented in 'Inter–annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production'"
-version: 1.1-preprint
+version: 1.2-preprint
 doi: 10.5281/zenodo.15089289
 date-released: 2026-01-21
 url: "https://github.com/de-ranit/GPP-ModelParamVariation"
