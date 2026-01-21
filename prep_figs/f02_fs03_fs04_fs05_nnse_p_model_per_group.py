@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 """
-Plot model performance results of the P model where a group of parameters
+Plot model performance results of the P-model where a group of parameters
 were varied per year, while the rest of the parameters were kept constant
-for a site. The performance metrics are calculated at hourly and annual scales for
-each climate vegetation class.
+for a site. The performance metrics are calculated at hourly and annual scales.
 
 author: rde
-first created: Mon Feb 10 2025 15:46:44 CET
+first created: Wed Feb 19 2025 18:11:11 CET
 """
+
 import sys
 import os
 from pathlib import Path
@@ -48,52 +48,6 @@ plt.rcParams["axes.edgecolor"] = "black"  # make the axes edge color black
 plt.rcParams["axes.linewidth"] = 2.0  # make the axes edge linewidth thicker
 
 
-def determine_bioclim(pft, kg):
-    """
-    determine the bioclimatic zone based on the PFT and KG
-
-    Parameters
-    ----------
-    pft (str) : plant functional type
-    kg (str) : Koppen-Geiger climate zone
-
-    Returns
-    -------
-    bioclim (str) : bioclimatic zone
-    """
-    if pft in ["EBF", "ENF", "DBF", "DNF", "MF", "WSA", "OSH", "CSH"]:
-        bio = "forest"
-    elif pft in ["GRA", "SAV", "CRO", "WET"]:
-        bio = "grass"
-    elif pft == "SNO":
-        bio = "Polar"
-    else:
-        raise ValueError("PFT not recognized")
-
-    if (kg[0] == "A") & (bio == "forest"):
-        bioclim = "TropicalF"
-    elif (kg[0] == "A") & (bio == "grass"):
-        bioclim = "TropicalG"
-    elif (kg[0] == "B") & (bio == "forest"):
-        bioclim = "AridF"
-    elif (kg[0] == "B") & (bio == "grass"):
-        bioclim = "AridG"
-    elif (kg[0] == "C") & (bio == "forest"):
-        bioclim = "TemperateF"
-    elif (kg[0] == "C") & (bio == "grass"):
-        bioclim = "TemperateG"
-    elif (kg[0] == "D") & (bio == "forest"):
-        bioclim = "BorealF"
-    elif (kg[0] == "D") & (bio == "grass"):
-        bioclim = "BorealG"
-    elif kg[0] == "E":
-        bioclim = "Polar"
-    else:
-        raise ValueError(f"Bioclim could not be determined for {pft} and {kg}")
-
-    return bioclim
-
-
 def get_mod_res_perform_arr(res_path, perform_metric):
     """
     get the model values of a given performance metric
@@ -125,50 +79,20 @@ def get_mod_res_perform_arr(res_path, perform_metric):
         )
     ]
 
-    perform_metric_hr_dict = {
-        "TropicalF": [],
-        "TropicalG": [],
-        "AridF": [],
-        "AridG": [],
-        "TemperateF": [],
-        "TemperateG": [],
-        "BorealF": [],
-        "BorealG": [],
-        "Polar": [],
-    }
+    perform_metric_hr = np.zeros(len(filtered_mod_res_file_list))
+    perform_metric_yy = np.zeros(len(filtered_mod_res_file_list))
 
-    perform_metric_yy_dict = {
-        "TropicalF": [],
-        "TropicalG": [],
-        "AridF": [],
-        "AridG": [],
-        "TemperateF": [],
-        "TemperateG": [],
-        "BorealF": [],
-        "BorealG": [],
-        "Polar": [],
-    }
-
-    for res_file in filtered_mod_res_file_list:
+    for ix, res_file in enumerate(filtered_mod_res_file_list):
         # open the results file for P Model
         res_dict = np.load(res_file, allow_pickle=True).item()
         # site_id = res_dict["SiteID"]
 
-        perform_metric_hr = res_dict[perform_metric][
+        perform_metric_yy[ix] = res_dict[perform_metric][f"{perform_metric}_y"]
+        perform_metric_hr[ix] = res_dict[perform_metric][
             f"{perform_metric}_{res_dict['Temp_res']}"
         ]
-        perform_metric_yy = res_dict[perform_metric][f"{perform_metric}_y"]
 
-        bioclim = determine_bioclim(res_dict["PFT"], res_dict["KG"])
-
-        perform_metric_hr_dict[bioclim].append(perform_metric_hr)
-        perform_metric_yy_dict[bioclim].append(perform_metric_yy)
-
-    for k, v in perform_metric_hr_dict.items():
-        perform_metric_yy_dict[k] = np.array(perform_metric_yy_dict[k])
-        perform_metric_hr_dict[k] = np.array(v)
-
-    return perform_metric_yy_dict, perform_metric_hr_dict
+    return perform_metric_yy, perform_metric_hr
 
 
 def get_perform_arr_dt_nt(data_path, perform_metric):
@@ -202,31 +126,10 @@ def get_perform_arr_dt_nt(data_path, perform_metric):
         )
     ]
 
-    perform_metric_hr_dict = {
-        "TropicalF": [],
-        "TropicalG": [],
-        "AridF": [],
-        "AridG": [],
-        "TemperateF": [],
-        "TemperateG": [],
-        "BorealF": [],
-        "BorealG": [],
-        "Polar": [],
-    }
+    perform_metric_hr = np.zeros(len(filtered_data_file_list))
+    perform_metric_yy = np.zeros(len(filtered_data_file_list))
 
-    perform_metric_yy_dict = {
-        "TropicalF": [],
-        "TropicalG": [],
-        "AridF": [],
-        "AridG": [],
-        "TemperateF": [],
-        "TemperateG": [],
-        "BorealF": [],
-        "BorealG": [],
-        "Polar": [],
-    }
-
-    for data_nc_file in filtered_data_file_list:
+    for ix, data_nc_file in enumerate(filtered_data_file_list):
 
         ip_df_dict = read_nc_data(data_nc_file, {"fPAR_var": "FPAR_FLUXNET_EO"})
 
@@ -281,58 +184,49 @@ def get_perform_arr_dt_nt(data_path, perform_metric):
 
         if perform_metric == "NSE":
             evaluator = RegressionMetric(gpp_nt, gpp_dt, decimal=5)
-            perform_metric_hr = evaluator.NSE()
+            perform_metric_hr[ix] = evaluator.NSE()
 
             if (gpp_nt_y_filtered.size < 3) or (gpp_dt_y_filtered.size < 3):
-                perform_metric_yy = np.nan
+                perform_metric_yy[ix] = np.nan
             else:
                 evaluator_y = RegressionMetric(
                     gpp_nt_y_filtered, gpp_dt_y_filtered, decimal=5
                 )
-                perform_metric_yy = evaluator_y.NSE()
+                perform_metric_yy[ix] = evaluator_y.NSE()
 
         elif perform_metric == "bias_coeff":
-            perform_metric_hr = calc_bias_metrics(gpp_nt, gpp_dt)
+            perform_metric_hr[ix] = calc_bias_metrics(gpp_nt, gpp_dt)
 
             if (gpp_nt_y_filtered.size < 3) or (gpp_dt_y_filtered.size < 3):
-                perform_metric_yy = np.nan
+                perform_metric_yy[ix] = np.nan
             else:
-                perform_metric_yy = calc_bias_metrics(
+                perform_metric_yy[ix] = calc_bias_metrics(
                     gpp_nt_y_filtered, gpp_dt_y_filtered
                 )
 
         elif perform_metric == "corr_coeff":
             evaluator = RegressionMetric(gpp_nt, gpp_dt, decimal=5)
-            perform_metric_hr = (evaluator.PCC()) ** 2.0
+            perform_metric_hr[ix] = (evaluator.PCC()) ** 2.0
 
             if (gpp_nt_y_filtered.size < 3) or (gpp_dt_y_filtered.size < 3):
-                perform_metric_yy = np.nan
+                perform_metric_yy[ix] = np.nan
             else:
                 evaluator_y = RegressionMetric(
                     gpp_nt_y_filtered, gpp_dt_y_filtered, decimal=5
                 )
-                perform_metric_yy = (evaluator_y.PCC()) ** 2.0
+                perform_metric_yy[ix] = (evaluator_y.PCC()) ** 2.0
 
         elif perform_metric == "variability_coeff":
-            perform_metric_hr = calc_variability_metrics(gpp_nt, gpp_dt)
+            perform_metric_hr[ix] = calc_variability_metrics(gpp_nt, gpp_dt)
 
             if (gpp_nt_y_filtered.size < 3) or (gpp_dt_y_filtered.size < 3):
-                perform_metric_yy = np.nan
+                perform_metric_yy[ix] = np.nan
             else:
-                perform_metric_yy = calc_variability_metrics(
+                perform_metric_yy[ix] = calc_variability_metrics(
                     gpp_nt_y_filtered, gpp_dt_y_filtered
                 )
 
-        bioclim = determine_bioclim(ip_df_dict["PFT"], ip_df_dict["KG"])
-
-        perform_metric_hr_dict[bioclim].append(perform_metric_hr)
-        perform_metric_yy_dict[bioclim].append(perform_metric_yy)
-
-    for k, v in perform_metric_hr_dict.items():
-        perform_metric_yy_dict[k] = np.array(perform_metric_yy_dict[k])
-        perform_metric_hr_dict[k] = np.array(v)
-
-    return perform_metric_yy_dict, perform_metric_hr_dict
+    return perform_metric_yy, perform_metric_hr
 
 
 def calc_nnse_rm_nan(nse_arr):
@@ -388,8 +282,8 @@ def plot_axs(
 
     Returns:
     --------
-    median_dict (dict) : dictionary of median values
-    of the performance metric for the different groups
+    median_dict (dict) : dictionary of median values of
+    the performance metric for the different groups
     """
 
     if metric_name == "NSE":
@@ -407,6 +301,7 @@ def plot_axs(
         metric_syr = metric_syr[~np.isnan(metric_syr)]
         metric_dt_nt = metric_dt_nt[~np.isnan(metric_dt_nt)]
 
+    # colors for the different groups
     # source: muted (https://packages.tesselle.org/khroma/articles/tol.html#muted)
     cols = [
         "#CC6677",
@@ -483,7 +378,7 @@ def plot_axs(
             edgecolor="white",
         )
         ax.lines[4].set_color(cols[4])
-        ax.lines[4].set_linewidth(3)
+        ax.lines[4].set_linewidth(4)
 
         sns.histplot(
             x=metric_dt_nt,
@@ -549,7 +444,7 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[4].set_color(cols[4])
+        ax.lines[4].set_color("black")
         ax.lines[4].set_linewidth(3)
 
         sns.histplot(
@@ -612,13 +507,11 @@ def plot_axs(
         ax.set_xticks(np.linspace(0.0, 1.0, 6))
         ax.set_xticklabels([round(x, 1) for x in np.linspace(0.0, 1.0, 6).tolist()])
 
-    elif (metric_name == "bias") and (title == r"(a) Bao$_{\text{hr}}$ model - hourly"):
-        ax.set_xticks(np.arange(-1, 0.5, 0.25))
-        ax.set_xticklabels([round(x, 2) for x in np.arange(-1, 0.5, 0.25).tolist()])
-
-    elif (metric_name == "bias") and (title == r"(b) Bao$_{\text{hr}}$ model - annual"):
-        ax.set_xticks(np.arange(-15, 8, 3))
-        ax.set_xticklabels([int(x) for x in np.arange(-15, 8, 3).tolist()])
+    elif (metric_name == "bias") and (
+        title == r"(a) P$^{\text{W}}_{\text{hr}}$ model - hourly"
+    ):
+        ax.set_xticks(np.arange(-1, 6, 1))
+        ax.set_xticklabels([int(x) for x in np.arange(-1, 6, 1).tolist()])
 
     ax.tick_params(axis="both", which="major", labelsize=26.0)
     ax.set_ylabel("")
@@ -668,49 +561,125 @@ def plot_fig_main(result_paths):
         result_paths.hr_ip_data_path, "NSE"
     )
 
-    ax_index_dict_hr = {
-        "TropicalF": [0, 0, "(a)"],
-        "TropicalG": [0, 1, "(b)"],
-        "AridF": [0, 2, "(c)"],
-        "AridG": [1, 0, "(d)"],
-        "TemperateF": [1, 1, "(e)"],
-        "TemperateG": [1, 2, "(f)"],
-        "BorealF": [2, 0, "(g)"],
-        "BorealG": [2, 1, "(h)"],
-        "Polar": [2, 2, "(i)"],
+    nse_coll_dict = {
+        "hr": {
+            "g01": nse_hr_g01,
+            "g02": nse_hr_g02,
+            "g03": nse_hr_g03,
+            "g04": nse_hr_g04,
+            "syr": nse_hr_syr,
+            "dt_nt": nse_hr_dt_nt,
+        },
+        "yy": {
+            "g01": nse_yy_g01,
+            "g02": nse_yy_g02,
+            "g03": nse_yy_g03,
+            "g04": nse_yy_g04,
+            "syr": nse_yy_syr,
+            "dt_nt": nse_yy_dt_nt,
+        },
     }
+    # save for pairwise significance testing
+    np.save("nse_model_per_group_p_model.npy", nse_coll_dict)
 
-    coll_median_dict_hr = {}
+    bias_yy_g01, bias_hr_g01 = get_mod_res_perform_arr(
+        result_paths.g01_vary_p_model_res_path, "bias_coeff"
+    )
+    bias_yy_g02, bias_hr_g02 = get_mod_res_perform_arr(
+        result_paths.g02_vary_p_model_res_path, "bias_coeff"
+    )
+    bias_yy_g03, bias_hr_g03 = get_mod_res_perform_arr(
+        result_paths.g03_vary_p_model_res_path, "bias_coeff"
+    )
+    bias_yy_g04, bias_hr_g04 = get_mod_res_perform_arr(
+        result_paths.g04_vary_p_model_res_path, "bias_coeff"
+    )
+    bias_yy_syr, bias_hr_syr = get_mod_res_perform_arr(
+        result_paths.per_site_yr_p_model_res_path, "bias_coeff"
+    )
+    bias_yy_dt_nt, bias_hr_dt_nt = get_perform_arr_dt_nt(
+        result_paths.hr_ip_data_path, "bias_coeff"
+    )
 
-    ###############################
+    corr_yy_g01, corr_hr_g01 = get_mod_res_perform_arr(
+        result_paths.g01_vary_p_model_res_path, "corr_coeff"
+    )
+    corr_yy_g02, corr_hr_g02 = get_mod_res_perform_arr(
+        result_paths.g02_vary_p_model_res_path, "corr_coeff"
+    )
+    corr_yy_g03, corr_hr_g03 = get_mod_res_perform_arr(
+        result_paths.g03_vary_p_model_res_path, "corr_coeff"
+    )
+    corr_yy_g04, corr_hr_g04 = get_mod_res_perform_arr(
+        result_paths.g04_vary_p_model_res_path, "corr_coeff"
+    )
+    corr_yy_syr, corr_hr_syr = get_mod_res_perform_arr(
+        result_paths.per_site_yr_p_model_res_path, "corr_coeff"
+    )
+    corr_yy_dt_nt, corr_hr_dt_nt = get_perform_arr_dt_nt(
+        result_paths.hr_ip_data_path, "corr_coeff"
+    )
+
+    variability_yy_g01, variability_hr_g01 = get_mod_res_perform_arr(
+        result_paths.g01_vary_p_model_res_path, "variability_coeff"
+    )
+    variability_yy_g02, variability_hr_g02 = get_mod_res_perform_arr(
+        result_paths.g02_vary_p_model_res_path, "variability_coeff"
+    )
+    variability_yy_g03, variability_hr_g03 = get_mod_res_perform_arr(
+        result_paths.g03_vary_p_model_res_path, "variability_coeff"
+    )
+    variability_yy_g04, variability_hr_g04 = get_mod_res_perform_arr(
+        result_paths.g04_vary_p_model_res_path, "variability_coeff"
+    )
+    variability_yy_syr, variability_hr_syr = get_mod_res_perform_arr(
+        result_paths.per_site_yr_p_model_res_path, "variability_coeff"
+    )
+    variability_yy_dt_nt, variability_hr_dt_nt = get_perform_arr_dt_nt(
+        result_paths.hr_ip_data_path, "variability_coeff"
+    )
+
+    # ###############################
     fig_width = 16
-    fig_height = 16
+    fig_height = 9
 
     # prepare the figure
     fig, axs = plt.subplots(
-        ncols=3, nrows=3, figsize=(fig_width, fig_height), sharex=True, sharey=True
+        ncols=2, nrows=1, figsize=(fig_width, fig_height), sharex=True, sharey=True
     )
 
-    for bioclim, metric_arr in nse_hr_g01.items():
-        med_dict = plot_axs(
-            axs[ax_index_dict_hr[bioclim][0], ax_index_dict_hr[bioclim][1]],
-            metric_arr,
-            nse_hr_g02[bioclim],
-            nse_hr_g03[bioclim],
-            nse_hr_g04[bioclim],
-            nse_hr_syr[bioclim],
-            nse_hr_dt_nt[bioclim],
-            f"{ax_index_dict_hr[bioclim][2]} {bioclim}",
-            "NSE",
-            bw_adjust=1.0,
-            cut=3,
-        )
+    hr_nnse_dict = plot_axs(
+        axs[0],
+        nse_hr_g01,
+        nse_hr_g02,
+        nse_hr_g03,
+        nse_hr_g04,
+        nse_hr_syr,
+        nse_hr_dt_nt,
+        r"(a) P$^{\text{W}}_{\text{hr}}$ model - hourly",
+        "NSE",
+        1.0,
+        3,
+    )
 
-        coll_median_dict_hr[bioclim] = med_dict
+    yy_nnse_dict = plot_axs(
+        axs[1],
+        nse_yy_g01,
+        nse_yy_g02,
+        nse_yy_g03,
+        nse_yy_g04,
+        nse_yy_syr,
+        nse_yy_dt_nt,
+        r"(b) P$^{\text{W}}_{\text{hr}}$ model - annual",
+        "NSE",
+        1.0,
+        3,
+    )
 
-    fig.supxlabel("NNSE [-]", y=0.03, fontsize=36)
+    fig.supxlabel("NNSE [-]", y=-0.01, fontsize=36)
     fig.supylabel("Fraction of" + r" sites [\%]", x=0.05, fontsize=36)
 
+    # Adding legend manually
     # source: muted (https://packages.tesselle.org/khroma/articles/tol.html#muted)
     colors = [
         "#CC6677",
@@ -759,7 +728,7 @@ def plot_fig_main(result_paths):
             [0],
             marker="s",
             color="w",
-            label=r"Between $\mathit{GPP_{NT}}$ and GPP$_{\text{DT}}$",
+            label=r"Between $\mathit{GPP_{NT}}$ and $\mathit{GPP_{DT}}$",
             markerfacecolor=colors[-1],
             markersize=25,
         )
@@ -771,64 +740,55 @@ def plot_fig_main(result_paths):
         loc="lower center",
         ncol=2,
         frameon=True,
-        bbox_to_anchor=(-0.8, -1.0),
+        bbox_to_anchor=(-0.1, -0.5),
     )
 
     fig_path = Path("figures")
     os.makedirs(fig_path, exist_ok=True)
-    plt.savefig(
-        "./supplement_figs/fs09_nnse_p_hr_climveg.png", dpi=300, bbox_inches="tight"
-    )
-    plt.savefig(
-        "./supplement_figs/fs09_nnse_p_hr_climveg.pdf", dpi=300, bbox_inches="tight"
-    )
+    plt.savefig("./figures/f02_nnse_p.png", dpi=300, bbox_inches="tight")
+    plt.savefig("./figures/f02_nnse_p.pdf", dpi=300, bbox_inches="tight")
     plt.close("all")
 
-    ###############################
-    ax_index_dict_yr = {
-        "TropicalG": [0, 0, "(a)"],
-        "AridF": [0, 1, "(b)"],
-        "AridG": [0, 2, "(c)"],
-        "TemperateF": [1, 0, "(d)"],
-        "TemperateG": [1, 1, "(e)"],
-        "BorealF": [1, 2, "(f)"],
-        "BorealG": [2, 0, "(g)"],
-        "Polar": [2, 1, "(h)"],
-    }
+    print("median NNSE")
+    df_nnse = pd.DataFrame([hr_nnse_dict, yy_nnse_dict])
+    df_nnse = df_nnse.transpose()
+    print(df_nnse.to_latex(index=False, float_format="%.3f"))
+    print("###################")
 
-    coll_median_dict_yy = {}
-
+    ########### BIAS ####################
     fig_width = 16
-    fig_height = 16
+    fig_height = 9
 
     # prepare the figure
     fig, axs = plt.subplots(
-        ncols=3, nrows=3, figsize=(fig_width, fig_height), sharex=True, sharey=True
+        ncols=2, nrows=1, figsize=(fig_width, fig_height), sharey=True
     )
 
-    for bioclim, metric_arr in nse_yy_g01.items():
-        if bioclim == "TropicalF":
-            pass
-        else:
-            med_dict = plot_axs(
-                axs[ax_index_dict_yr[bioclim][0], ax_index_dict_yr[bioclim][1]],
-                metric_arr,
-                nse_yy_g02[bioclim],
-                nse_yy_g03[bioclim],
-                nse_yy_g04[bioclim],
-                nse_yy_syr[bioclim],
-                nse_yy_dt_nt[bioclim],
-                f"{ax_index_dict_yr[bioclim][2]} {bioclim}",
-                "NSE",
-                bw_adjust=1.0,
-                cut=3,
-            )
+    hr_bias_dict = plot_axs(
+        axs[0],
+        bias_hr_g01,
+        bias_hr_g02,
+        bias_hr_g03,
+        bias_hr_g04,
+        bias_hr_syr,
+        bias_hr_dt_nt,
+        r"(a) P$^{\text{W}}_{\text{hr}}$ model - hourly",
+        "bias",
+    )
 
-            coll_median_dict_yy[bioclim] = med_dict
+    yy_bias_dict = plot_axs(
+        axs[1],
+        bias_yy_g01,
+        bias_yy_g02,
+        bias_yy_g03,
+        bias_yy_g04,
+        bias_yy_syr,
+        bias_yy_dt_nt,
+        r"(b) P$^{\text{W}}_{\text{hr}}$ model - annual",
+        "bias",
+    )
 
-    fig.delaxes(axs[2, 2])
-
-    fig.supxlabel("NNSE [-]", y=0.03, fontsize=36)
+    fig.supxlabel("Bias [-]", y=-0.01, fontsize=36)
     fig.supylabel("Fraction of" + r" sites [\%]", x=0.05, fontsize=36)
 
     plt.legend(
@@ -837,74 +797,141 @@ def plot_fig_main(result_paths):
         loc="lower center",
         ncol=2,
         frameon=True,
-        bbox_to_anchor=(0.5, -1.0),
+        bbox_to_anchor=(-0.1, -0.5),
     )
 
-    fig_path = Path("figures")
+    fig_path = Path("supplement_figs")
+    os.makedirs(fig_path, exist_ok=True)
+    plt.savefig("./supplement_figs/fs03_bias_p.png", dpi=300, bbox_inches="tight")
+    plt.savefig("./supplement_figs/fs03_bias_p.pdf", dpi=300, bbox_inches="tight")
+    plt.close("all")
+
+    df_bias = pd.DataFrame([hr_bias_dict, yy_bias_dict])
+    df_bias = df_bias.transpose()
+
+    print("median bias")
+    print(df_bias.to_latex(index=False, float_format="%.3f"))
+    print("###################")
+
+    ########### CORR ####################
+    fig_width = 16
+    fig_height = 9
+
+    # prepare the figure
+    fig, axs = plt.subplots(
+        ncols=2, nrows=1, figsize=(fig_width, fig_height), sharey=True
+    )
+
+    hr_corr_dict = plot_axs(
+        axs[0],
+        corr_hr_g01,
+        corr_hr_g02,
+        corr_hr_g03,
+        corr_hr_g04,
+        corr_hr_syr,
+        corr_hr_dt_nt,
+        r"(a) P$^{\text{W}}_{\text{hr}}$ model - hourly",
+        "corr_coeff",
+    )
+
+    yy_corr_dict = plot_axs(
+        axs[1],
+        corr_yy_g01,
+        corr_yy_g02,
+        corr_yy_g03,
+        corr_yy_g04,
+        corr_yy_syr,
+        corr_yy_dt_nt,
+        r"(b) P$^{\text{W}}_{\text{hr}}$ model - annual",
+        "corr_coeff",
+    )
+
+    fig.supxlabel("Correlation coefficient [-]", y=-0.01, fontsize=36)
+    fig.supylabel("Fraction of" + r" sites [\%]", x=0.05, fontsize=36)
+
+    plt.legend(
+        handles=legend_elements,
+        fontsize=28,
+        loc="lower center",
+        ncol=2,
+        frameon=True,
+        bbox_to_anchor=(-0.1, -0.5),
+    )
+
+    fig_path = Path("supplement_figs")
+    os.makedirs(fig_path, exist_ok=True)
+    plt.savefig("./supplement_figs/fs04_corr_p.png", dpi=300, bbox_inches="tight")
+    plt.savefig("./supplement_figs/fs04_corr_p.pdf", dpi=300, bbox_inches="tight")
+    plt.close("all")
+
+    df_corr = pd.DataFrame([hr_corr_dict, yy_corr_dict])
+    df_corr = df_corr.transpose()
+
+    print("median corr coeff")
+    print(df_corr.to_latex(index=False, float_format="%.3f"))
+    print("###################")
+
+    ########### VAR ####################
+    fig_width = 16
+    fig_height = 9
+
+    # prepare the figure
+    fig, axs = plt.subplots(
+        ncols=2, nrows=1, figsize=(fig_width, fig_height), sharey=True
+    )
+
+    hr_varib_dict = plot_axs(
+        axs[0],
+        variability_hr_g01,
+        variability_hr_g02,
+        variability_hr_g03,
+        variability_hr_g04,
+        variability_hr_syr,
+        variability_hr_dt_nt,
+        r"(a) P$^{\text{W}}_{\text{hr}}$ model - hourly",
+        "variability",
+    )
+
+    yy_varib_dict = plot_axs(
+        axs[1],
+        variability_yy_g01,
+        variability_yy_g02,
+        variability_yy_g03,
+        variability_yy_g04,
+        variability_yy_syr,
+        variability_yy_dt_nt,
+        r"(b) P$^{\text{W}}_{\text{hr}}$ model - annual",
+        "variability",
+    )
+
+    fig.supxlabel("Relative variability [-]", y=-0.01, fontsize=36)
+    fig.supylabel("Fraction of" + r" sites [\%]", x=0.05, fontsize=36)
+
+    plt.legend(
+        handles=legend_elements,
+        fontsize=28,
+        loc="lower center",
+        ncol=2,
+        frameon=True,
+        bbox_to_anchor=(-0.1, -0.5),
+    )
+
+    fig_path = Path("supplement_figs")
     os.makedirs(fig_path, exist_ok=True)
     plt.savefig(
-        "./supplement_figs/fs10_nnse_p_yy_climveg.png", dpi=300, bbox_inches="tight"
+        "./supplement_figs/fs05_variability_p.png", dpi=300, bbox_inches="tight"
     )
     plt.savefig(
-        "./supplement_figs/fs10_nnse_p_yy_climveg.pdf", dpi=300, bbox_inches="tight"
+        "./supplement_figs/fs05_variability_p.pdf", dpi=300, bbox_inches="tight"
     )
     plt.close("all")
 
-    columns = [
-        "type",
-        "g01",
-        "g02",
-        "g03",
-        "g04",
-        "syr",
-        "dt_nt",
-    ]
+    df_varib = pd.DataFrame([hr_varib_dict, yy_varib_dict])
+    df_varib = df_varib.transpose()
 
-    result_df_hr = pd.DataFrame(columns=columns)
-
+    print("median variability")
+    print(df_varib.to_latex(index=False, float_format="%.3f"))
     print("###################")
-    print("Hourly")
-    print("###################")
-    for bioclim, median_dict in coll_median_dict_hr.items():
-        row_df_hr = pd.DataFrame(
-            [
-                {
-                    "type": bioclim,
-                    "g01": median_dict["g01"],
-                    "g02": median_dict["g02"],
-                    "g03": median_dict["g03"],
-                    "g04": median_dict["g04"],
-                    "syr": median_dict["syr"],
-                    "dt_nt": median_dict["dt_nt"],
-                }
-            ]
-        )
-        result_df_hr = pd.concat([result_df_hr, row_df_hr], ignore_index=True)
-
-    print(result_df_hr.to_latex(index=False, float_format="%.2f"))
-
-    print("###################")
-    print("Annual")
-    print("###################")
-
-    result_df_yy = pd.DataFrame(columns=columns)
-    for bioclim, median_dict in coll_median_dict_yy.items():
-        row_df_yy = pd.DataFrame(
-            [
-                {
-                    "type": bioclim,
-                    "g01": median_dict["g01"],
-                    "g02": median_dict["g02"],
-                    "g03": median_dict["g03"],
-                    "g04": median_dict["g04"],
-                    "syr": median_dict["syr"],
-                    "dt_nt": median_dict["dt_nt"],
-                }
-            ]
-        )
-
-        result_df_yy = pd.concat([result_df_yy, row_df_yy], ignore_index=True)
-    print(result_df_yy.to_latex(index=False, float_format="%.2f"))
 
 
 if __name__ == "__main__":

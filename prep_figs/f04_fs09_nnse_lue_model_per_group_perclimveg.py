@@ -908,12 +908,12 @@ def plot_fig_main(result_paths):
             [
                 r"Group 01 ($\varepsilon_{max}$)",
                 r"Group 02 ($fT$)",
-                r"Group 03 ($fVPD$ and $fCO_2$)",
+                r"Group 03 ($fVPD$ and $CO_2$)",
                 r"Group 04 ($fL$)",
                 r"Group 05 ($fCI$)",
                 r"Group 06 ($fW$)",
                 r"Group 07 ($WAI$)",
-                r"Group 08 ($WAI$ + $fW$)",
+                r"Group 08 ($fW$ and $WAI$)",
             ]
         )
     ]
@@ -954,10 +954,10 @@ def plot_fig_main(result_paths):
     fig_path = Path("supplement_figs")
     os.makedirs(fig_path, exist_ok=True)
     plt.savefig(
-        "./supplement_figs/fs08_nnse_lue_hr_climveg.png", dpi=300, bbox_inches="tight"
+        "./supplement_figs/fs09_nnse_lue_hr_climveg.png", dpi=300, bbox_inches="tight"
     )
     plt.savefig(
-        "./supplement_figs/fs08_nnse_lue_hr_climveg.pdf", dpi=300, bbox_inches="tight"
+        "./supplement_figs/fs09_nnse_lue_hr_climveg.pdf", dpi=300, bbox_inches="tight"
     )
     plt.close("all")
 

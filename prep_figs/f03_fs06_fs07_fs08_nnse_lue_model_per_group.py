@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """
-Plot model performance results of the P-model where a group of parameters
+Plot model performance results of the Bao model where a group of parameters
 were varied per year, while the rest of the parameters were kept constant
 for a site. The performance metrics are calculated at hourly and annual scales.
 
 author: rde
-first created: Wed Feb 19 2025 18:11:11 CET
+first created: Mon Feb 10 2025 15:46:44 CET
 """
-
 import sys
 import os
 from pathlib import Path
@@ -22,7 +21,6 @@ from matplotlib.lines import Line2D
 import seaborn as sns
 import pandas as pd
 from permetrics import RegressionMetric
-
 
 # add the path where modules of experiments are stored
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -254,6 +252,10 @@ def plot_axs(
     metric_g02,
     metric_g03,
     metric_g04,
+    metric_g05,
+    metric_g06,
+    metric_g07,
+    metric_g08,
     metric_syr,
     metric_dt_nt,
     title,
@@ -275,6 +277,14 @@ def plot_axs(
     when group 03 parameters varied per year
     metric_g04 (np.ndarray) : array of performance metric values when
     group 04 parameters varied per year
+    metric_g05 (np.ndarray) : array of performance metric values when
+    group 05 parameters varied per year
+    metric_g06 (np.ndarray) : array of performance metric values when
+    group 06 parameters varied per year
+    metric_g07 (np.ndarray) : array of performance metric values when
+    group 07 parameters varied per year
+    metric_g08 (np.ndarray) : array of performance metric values when
+    group 08 parameters varied per year
     title (str) : title of the plot
     metric_name (str) : name of the performance metric
     bw_adjust (float) : bandwidth adjustment for the KDE
@@ -282,8 +292,8 @@ def plot_axs(
 
     Returns:
     --------
-    median_dict (dict) : dictionary of median values of
-    the performance metric for the different groups
+    median_dict (dict) : dictionary of median values
+    of the performance metric for the different groups
     """
 
     if metric_name == "NSE":
@@ -291,6 +301,10 @@ def plot_axs(
         metric_g02 = calc_nnse_rm_nan(metric_g02)
         metric_g03 = calc_nnse_rm_nan(metric_g03)
         metric_g04 = calc_nnse_rm_nan(metric_g04)
+        metric_g05 = calc_nnse_rm_nan(metric_g05)
+        metric_g06 = calc_nnse_rm_nan(metric_g06)
+        metric_g07 = calc_nnse_rm_nan(metric_g07)
+        metric_g08 = calc_nnse_rm_nan(metric_g08)
         metric_syr = calc_nnse_rm_nan(metric_syr)
         metric_dt_nt = calc_nnse_rm_nan(metric_dt_nt)
     else:
@@ -298,6 +312,10 @@ def plot_axs(
         metric_g02 = metric_g02[~np.isnan(metric_g02)]
         metric_g03 = metric_g03[~np.isnan(metric_g03)]
         metric_g04 = metric_g04[~np.isnan(metric_g04)]
+        metric_g05 = metric_g05[~np.isnan(metric_g05)]
+        metric_g06 = metric_g06[~np.isnan(metric_g06)]
+        metric_g07 = metric_g07[~np.isnan(metric_g07)]
+        metric_g08 = metric_g08[~np.isnan(metric_g08)]
         metric_syr = metric_syr[~np.isnan(metric_syr)]
         metric_dt_nt = metric_dt_nt[~np.isnan(metric_dt_nt)]
 
@@ -308,6 +326,10 @@ def plot_axs(
         "#332288",
         "#DDCC77",
         "#117733",
+        "#88CCEE",
+        "#882255",
+        "#44AA99",
+        "#999933",
         "black",
         "#AA4499",
     ]
@@ -367,7 +389,7 @@ def plot_axs(
         ax.lines[3].set_color(cols[3])
 
         sns.histplot(
-            x=metric_syr,
+            x=metric_g05,
             stat="percent",
             kde=True,
             kde_kws={"bw_adjust": bw_adjust, "cut": cut, "clip": (0.0, 1.0)},
@@ -378,7 +400,59 @@ def plot_axs(
             edgecolor="white",
         )
         ax.lines[4].set_color(cols[4])
-        ax.lines[4].set_linewidth(4)
+
+        sns.histplot(
+            x=metric_g06,
+            stat="percent",
+            kde=True,
+            kde_kws={"bw_adjust": bw_adjust, "cut": cut, "clip": (0.0, 1.0)},
+            binrange=(0, 1.0),
+            binwidth=0.1,
+            ax=ax,
+            color="white",
+            edgecolor="white",
+        )
+        ax.lines[5].set_color(cols[5])
+
+        sns.histplot(
+            x=metric_g07,
+            stat="percent",
+            kde=True,
+            kde_kws={"bw_adjust": bw_adjust, "cut": cut, "clip": (0.0, 1.0)},
+            binrange=(0, 1.0),
+            binwidth=0.1,
+            ax=ax,
+            color="white",
+            edgecolor="white",
+        )
+        ax.lines[6].set_color(cols[6])
+
+        sns.histplot(
+            x=metric_g08,
+            stat="percent",
+            kde=True,
+            kde_kws={"bw_adjust": bw_adjust, "cut": cut, "clip": (0.0, 1.0)},
+            binrange=(0, 1.0),
+            binwidth=0.1,
+            ax=ax,
+            color="white",
+            edgecolor="white",
+        )
+        ax.lines[7].set_color(cols[7])
+
+        sns.histplot(
+            x=metric_syr,
+            stat="percent",
+            kde=True,
+            kde_kws={"bw_adjust": bw_adjust, "cut": cut, "clip": (0.0, 1.0)},
+            binrange=(0, 1.0),
+            binwidth=0.1,
+            ax=ax,
+            color="white",
+            edgecolor="white",
+        )
+        ax.lines[8].set_color(cols[8])
+        ax.lines[8].set_linewidth(3)
 
         sns.histplot(
             x=metric_dt_nt,
@@ -391,8 +465,8 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[5].set_color(cols[5])
-        ax.lines[5].set_linestyle("-.")
+        ax.lines[9].set_color(cols[9])
+        ax.lines[9].set_linestyle("-.")
 
     else:
         # plot the histograms and KDE - but make histogram invisible and only show KDE
@@ -437,6 +511,46 @@ def plot_axs(
         ax.lines[3].set_color(cols[3])
 
         sns.histplot(
+            x=metric_g05,
+            stat="percent",
+            kde=True,
+            ax=ax,
+            color="white",
+            edgecolor="white",
+        )
+        ax.lines[4].set_color(cols[4])
+
+        sns.histplot(
+            x=metric_g06,
+            stat="percent",
+            kde=True,
+            ax=ax,
+            color="white",
+            edgecolor="white",
+        )
+        ax.lines[5].set_color(cols[5])
+
+        sns.histplot(
+            x=metric_g07,
+            stat="percent",
+            kde=True,
+            ax=ax,
+            color="white",
+            edgecolor="white",
+        )
+        ax.lines[6].set_color(cols[6])
+
+        sns.histplot(
+            x=metric_g08,
+            stat="percent",
+            kde=True,
+            ax=ax,
+            color="white",
+            edgecolor="white",
+        )
+        ax.lines[7].set_color(cols[7])
+
+        sns.histplot(
             x=metric_syr,
             stat="percent",
             kde=True,
@@ -444,8 +558,8 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[4].set_color("black")
-        ax.lines[4].set_linewidth(3)
+        ax.lines[8].set_color(cols[8])
+        ax.lines[8].set_linewidth(3)
 
         sns.histplot(
             x=metric_dt_nt,
@@ -455,8 +569,8 @@ def plot_axs(
             color="white",
             edgecolor="white",
         )
-        ax.lines[5].set_color(cols[5])
-        ax.lines[5].set_linestyle("-.")
+        ax.lines[9].set_color(cols[9])
+        ax.lines[9].set_linestyle("-.")
 
     # add vertical lines for the median values
     ax.axvline(
@@ -488,16 +602,44 @@ def plot_axs(
         dashes=(4, 2),
     )
     ax.axvline(
-        x=np.median(metric_syr),
+        x=np.median(metric_g05),
         linestyle=":",
         color=cols[4],
         linewidth=1.5,
         dashes=(4, 2),
     )
     ax.axvline(
-        x=np.median(metric_dt_nt),
+        x=np.median(metric_g06),
         linestyle=":",
         color=cols[5],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g07),
+        linestyle=":",
+        color=cols[6],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_g08),
+        linestyle=":",
+        color=cols[7],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_syr),
+        linestyle=":",
+        color=cols[8],
+        linewidth=1.5,
+        dashes=(4, 2),
+    )
+    ax.axvline(
+        x=np.median(metric_dt_nt),
+        linestyle=":",
+        color=cols[9],
         linewidth=1.5,
         dashes=(4, 2),
     )
@@ -507,11 +649,13 @@ def plot_axs(
         ax.set_xticks(np.linspace(0.0, 1.0, 6))
         ax.set_xticklabels([round(x, 1) for x in np.linspace(0.0, 1.0, 6).tolist()])
 
-    elif (metric_name == "bias") and (
-        title == r"(a) P$^{\text{W}}_{\text{hr}}$ model - hourly"
-    ):
-        ax.set_xticks(np.arange(-1, 6, 1))
-        ax.set_xticklabels([int(x) for x in np.arange(-1, 6, 1).tolist()])
+    elif (metric_name == "bias") and (title == r"(a) Bao$_{\text{hr}}$ model - hourly"):
+        ax.set_xticks(np.arange(-1, 0.5, 0.25))
+        ax.set_xticklabels([round(x, 2) for x in np.arange(-1, 0.5, 0.25).tolist()])
+
+    elif (metric_name == "bias") and (title == r"(b) Bao$_{\text{hr}}$ model - annual"):
+        ax.set_xticks(np.arange(-15, 8, 3))
+        ax.set_xticklabels([int(x) for x in np.arange(-15, 8, 3).tolist()])
 
     ax.tick_params(axis="both", which="major", labelsize=26.0)
     ax.set_ylabel("")
@@ -524,6 +668,10 @@ def plot_axs(
         "g02": np.median(metric_g02),
         "g03": np.median(metric_g03),
         "g04": np.median(metric_g04),
+        "g05": np.median(metric_g05),
+        "g06": np.median(metric_g06),
+        "g07": np.median(metric_g07),
+        "g08": np.median(metric_g08),
         "syr": np.median(metric_syr),
         "dt_nt": np.median(metric_dt_nt),
     }
@@ -543,82 +691,160 @@ def plot_fig_main(result_paths):
     """
 
     nse_yy_g01, nse_hr_g01 = get_mod_res_perform_arr(
-        result_paths.g01_vary_p_model_res_path, "NSE"
+        result_paths.g01_vary_lue_model_res_path,
+        "NSE",
     )
     nse_yy_g02, nse_hr_g02 = get_mod_res_perform_arr(
-        result_paths.g02_vary_p_model_res_path, "NSE"
+        result_paths.g02_vary_lue_model_res_path, "NSE"
     )
     nse_yy_g03, nse_hr_g03 = get_mod_res_perform_arr(
-        result_paths.g03_vary_p_model_res_path, "NSE"
+        result_paths.g03_vary_lue_model_res_path, "NSE"
     )
     nse_yy_g04, nse_hr_g04 = get_mod_res_perform_arr(
-        result_paths.g04_vary_p_model_res_path, "NSE"
+        result_paths.g04_vary_lue_model_res_path, "NSE"
+    )
+    nse_yy_g05, nse_hr_g05 = get_mod_res_perform_arr(
+        result_paths.g05_vary_lue_model_res_path, "NSE"
+    )
+    nse_yy_g06, nse_hr_g06 = get_mod_res_perform_arr(
+        result_paths.g06_vary_lue_model_res_path, "NSE"
+    )
+    nse_yy_g07, nse_hr_g07 = get_mod_res_perform_arr(
+        result_paths.g07_vary_lue_model_res_path, "NSE"
+    )
+    nse_yy_g08, nse_hr_g08 = get_mod_res_perform_arr(
+        result_paths.g08_vary_lue_model_res_path, "NSE"
     )
     nse_yy_syr, nse_hr_syr = get_mod_res_perform_arr(
-        result_paths.per_site_yr_p_model_res_path, "NSE"
+        result_paths.per_site_yr_lue_model_res_path, "NSE"
     )
     nse_yy_dt_nt, nse_hr_dt_nt = get_perform_arr_dt_nt(
         result_paths.hr_ip_data_path, "NSE"
     )
 
+    nse_coll_dict = {
+        "hr": {
+            "g01": nse_hr_g01,
+            "g02": nse_hr_g02,
+            "g03": nse_hr_g03,
+            "g04": nse_hr_g04,
+            "g05": nse_hr_g05,
+            "g06": nse_hr_g06,
+            "g07": nse_hr_g07,
+            "g08": nse_hr_g08,
+            "syr": nse_hr_syr,
+            "dt_nt": nse_hr_dt_nt,
+        },
+        "yy": {
+            "g01": nse_yy_g01,
+            "g02": nse_yy_g02,
+            "g03": nse_yy_g03,
+            "g04": nse_yy_g04,
+            "g05": nse_yy_g05,
+            "g06": nse_yy_g06,
+            "g07": nse_yy_g07,
+            "g08": nse_yy_g08,
+            "syr": nse_yy_syr,
+            "dt_nt": nse_yy_dt_nt,
+        },
+    }
+    # save for pairwise significance testing
+    np.save("nse_model_per_group_lue_model.npy", nse_coll_dict)
+
     bias_yy_g01, bias_hr_g01 = get_mod_res_perform_arr(
-        result_paths.g01_vary_p_model_res_path, "bias_coeff"
+        result_paths.g01_vary_lue_model_res_path, "bias_coeff"
     )
     bias_yy_g02, bias_hr_g02 = get_mod_res_perform_arr(
-        result_paths.g02_vary_p_model_res_path, "bias_coeff"
+        result_paths.g02_vary_lue_model_res_path, "bias_coeff"
     )
     bias_yy_g03, bias_hr_g03 = get_mod_res_perform_arr(
-        result_paths.g03_vary_p_model_res_path, "bias_coeff"
+        result_paths.g03_vary_lue_model_res_path, "bias_coeff"
     )
     bias_yy_g04, bias_hr_g04 = get_mod_res_perform_arr(
-        result_paths.g04_vary_p_model_res_path, "bias_coeff"
+        result_paths.g04_vary_lue_model_res_path, "bias_coeff"
+    )
+    bias_yy_g05, bias_hr_g05 = get_mod_res_perform_arr(
+        result_paths.g05_vary_lue_model_res_path, "bias_coeff"
+    )
+    bias_yy_g06, bias_hr_g06 = get_mod_res_perform_arr(
+        result_paths.g06_vary_lue_model_res_path, "bias_coeff"
+    )
+    bias_yy_g07, bias_hr_g07 = get_mod_res_perform_arr(
+        result_paths.g07_vary_lue_model_res_path, "bias_coeff"
+    )
+    bias_yy_g08, bias_hr_g08 = get_mod_res_perform_arr(
+        result_paths.g08_vary_lue_model_res_path, "bias_coeff"
     )
     bias_yy_syr, bias_hr_syr = get_mod_res_perform_arr(
-        result_paths.per_site_yr_p_model_res_path, "bias_coeff"
+        result_paths.per_site_yr_lue_model_res_path, "bias_coeff"
     )
     bias_yy_dt_nt, bias_hr_dt_nt = get_perform_arr_dt_nt(
         result_paths.hr_ip_data_path, "bias_coeff"
     )
 
     corr_yy_g01, corr_hr_g01 = get_mod_res_perform_arr(
-        result_paths.g01_vary_p_model_res_path, "corr_coeff"
+        result_paths.g01_vary_lue_model_res_path, "corr_coeff"
     )
     corr_yy_g02, corr_hr_g02 = get_mod_res_perform_arr(
-        result_paths.g02_vary_p_model_res_path, "corr_coeff"
+        result_paths.g02_vary_lue_model_res_path, "corr_coeff"
     )
     corr_yy_g03, corr_hr_g03 = get_mod_res_perform_arr(
-        result_paths.g03_vary_p_model_res_path, "corr_coeff"
+        result_paths.g03_vary_lue_model_res_path, "corr_coeff"
     )
     corr_yy_g04, corr_hr_g04 = get_mod_res_perform_arr(
-        result_paths.g04_vary_p_model_res_path, "corr_coeff"
+        result_paths.g04_vary_lue_model_res_path, "corr_coeff"
+    )
+    corr_yy_g05, corr_hr_g05 = get_mod_res_perform_arr(
+        result_paths.g05_vary_lue_model_res_path, "corr_coeff"
+    )
+    corr_yy_g06, corr_hr_g06 = get_mod_res_perform_arr(
+        result_paths.g06_vary_lue_model_res_path, "corr_coeff"
+    )
+    corr_yy_g07, corr_hr_g07 = get_mod_res_perform_arr(
+        result_paths.g07_vary_lue_model_res_path, "corr_coeff"
+    )
+    corr_yy_g08, corr_hr_g08 = get_mod_res_perform_arr(
+        result_paths.g08_vary_lue_model_res_path, "corr_coeff"
     )
     corr_yy_syr, corr_hr_syr = get_mod_res_perform_arr(
-        result_paths.per_site_yr_p_model_res_path, "corr_coeff"
+        result_paths.per_site_yr_lue_model_res_path, "corr_coeff"
     )
     corr_yy_dt_nt, corr_hr_dt_nt = get_perform_arr_dt_nt(
         result_paths.hr_ip_data_path, "corr_coeff"
     )
 
     variability_yy_g01, variability_hr_g01 = get_mod_res_perform_arr(
-        result_paths.g01_vary_p_model_res_path, "variability_coeff"
+        result_paths.g01_vary_lue_model_res_path, "variability_coeff"
     )
     variability_yy_g02, variability_hr_g02 = get_mod_res_perform_arr(
-        result_paths.g02_vary_p_model_res_path, "variability_coeff"
+        result_paths.g02_vary_lue_model_res_path, "variability_coeff"
     )
     variability_yy_g03, variability_hr_g03 = get_mod_res_perform_arr(
-        result_paths.g03_vary_p_model_res_path, "variability_coeff"
+        result_paths.g03_vary_lue_model_res_path, "variability_coeff"
     )
     variability_yy_g04, variability_hr_g04 = get_mod_res_perform_arr(
-        result_paths.g04_vary_p_model_res_path, "variability_coeff"
+        result_paths.g04_vary_lue_model_res_path, "variability_coeff"
+    )
+    variability_yy_g05, variability_hr_g05 = get_mod_res_perform_arr(
+        result_paths.g05_vary_lue_model_res_path, "variability_coeff"
+    )
+    variability_yy_g06, variability_hr_g06 = get_mod_res_perform_arr(
+        result_paths.g06_vary_lue_model_res_path, "variability_coeff"
+    )
+    variability_yy_g07, variability_hr_g07 = get_mod_res_perform_arr(
+        result_paths.g07_vary_lue_model_res_path, "variability_coeff"
+    )
+    variability_yy_g08, variability_hr_g08 = get_mod_res_perform_arr(
+        result_paths.g08_vary_lue_model_res_path, "variability_coeff"
     )
     variability_yy_syr, variability_hr_syr = get_mod_res_perform_arr(
-        result_paths.per_site_yr_p_model_res_path, "variability_coeff"
+        result_paths.per_site_yr_lue_model_res_path, "variability_coeff"
     )
     variability_yy_dt_nt, variability_hr_dt_nt = get_perform_arr_dt_nt(
         result_paths.hr_ip_data_path, "variability_coeff"
     )
 
-    # ###############################
+    ###############################
     fig_width = 16
     fig_height = 9
 
@@ -633,12 +859,16 @@ def plot_fig_main(result_paths):
         nse_hr_g02,
         nse_hr_g03,
         nse_hr_g04,
+        nse_hr_g05,
+        nse_hr_g06,
+        nse_hr_g07,
+        nse_hr_g08,
         nse_hr_syr,
         nse_hr_dt_nt,
-        r"(a) P$^{\text{W}}_{\text{hr}}$ model - hourly",
+        r"(a) Bao$_{\text{hr}}$ model - hourly",
         "NSE",
-        1.0,
-        3,
+        bw_adjust=1.0,
+        cut=3,
     )
 
     yy_nnse_dict = plot_axs(
@@ -647,12 +877,16 @@ def plot_fig_main(result_paths):
         nse_yy_g02,
         nse_yy_g03,
         nse_yy_g04,
+        nse_yy_g05,
+        nse_yy_g06,
+        nse_yy_g07,
+        nse_yy_g08,
         nse_yy_syr,
         nse_yy_dt_nt,
-        r"(b) P$^{\text{W}}_{\text{hr}}$ model - annual",
+        r"(b) Bao$_{\text{hr}}$ model - annual",
         "NSE",
-        1.0,
-        3,
+        bw_adjust=1.0,
+        cut=3,
     )
 
     fig.supxlabel("NNSE [-]", y=-0.01, fontsize=36)
@@ -665,6 +899,10 @@ def plot_fig_main(result_paths):
         "#332288",
         "#DDCC77",
         "#117733",
+        "#88CCEE",
+        "#882255",
+        "#44AA99",
+        "#999933",
         "black",
         "#AA4499",
     ]
@@ -681,10 +919,14 @@ def plot_fig_main(result_paths):
         )
         for i, opti_type in enumerate(
             [
-                r"Group 01 ($A_t$)",
-                r"Group 02 ($fW$)",
-                r"Group 03 ($WAI$)",
-                r"Group 04 ($fW$ and $WAI$)",
+                r"Group 01 ($\varepsilon_{max}$)",
+                r"Group 02 ($fT$)",
+                r"Group 03 ($fVPD$ and $CO_2$)",
+                r"Group 04 ($fL$)",
+                r"Group 05 ($fCI$)",
+                r"Group 06 ($fW$)",
+                r"Group 07 ($WAI$)",
+                r"Group 08 ($fW$ and $WAI$)",
             ]
         )
     ]
@@ -719,13 +961,13 @@ def plot_fig_main(result_paths):
         loc="lower center",
         ncol=2,
         frameon=True,
-        bbox_to_anchor=(-0.1, -0.5),
+        bbox_to_anchor=(-0.1, -0.63),
     )
 
     fig_path = Path("figures")
     os.makedirs(fig_path, exist_ok=True)
-    plt.savefig("./figures/f02_nnse_p.png", dpi=300, bbox_inches="tight")
-    plt.savefig("./figures/f02_nnse_p.pdf", dpi=300, bbox_inches="tight")
+    plt.savefig("./figures/f03_nnse_lue.png", dpi=300, bbox_inches="tight")
+    plt.savefig("./figures/f03_nnse_lue.pdf", dpi=300, bbox_inches="tight")
     plt.close("all")
 
     print("median NNSE")
@@ -734,7 +976,7 @@ def plot_fig_main(result_paths):
     print(df_nnse.to_latex(index=False, float_format="%.3f"))
     print("###################")
 
-    ########### BIAS ####################
+    # ########### BIAS ####################
     fig_width = 16
     fig_height = 9
 
@@ -749,9 +991,13 @@ def plot_fig_main(result_paths):
         bias_hr_g02,
         bias_hr_g03,
         bias_hr_g04,
+        bias_hr_g05,
+        bias_hr_g06,
+        bias_hr_g07,
+        bias_hr_g08,
         bias_hr_syr,
         bias_hr_dt_nt,
-        r"(a) P$^{\text{W}}_{\text{hr}}$ model - hourly",
+        r"(a) Bao$_{\text{hr}}$ model - hourly",
         "bias",
     )
 
@@ -761,9 +1007,13 @@ def plot_fig_main(result_paths):
         bias_yy_g02,
         bias_yy_g03,
         bias_yy_g04,
+        bias_yy_g05,
+        bias_yy_g06,
+        bias_yy_g07,
+        bias_yy_g08,
         bias_yy_syr,
         bias_yy_dt_nt,
-        r"(b) P$^{\text{W}}_{\text{hr}}$ model - annual",
+        r"(b) Bao$_{\text{hr}}$ model - annual",
         "bias",
     )
 
@@ -776,13 +1026,13 @@ def plot_fig_main(result_paths):
         loc="lower center",
         ncol=2,
         frameon=True,
-        bbox_to_anchor=(-0.1, -0.5),
+        bbox_to_anchor=(-0.1, -0.63),
     )
 
     fig_path = Path("supplement_figs")
     os.makedirs(fig_path, exist_ok=True)
-    plt.savefig("./supplement_figs/fs02_bias_p.png", dpi=300, bbox_inches="tight")
-    plt.savefig("./supplement_figs/fs02_bias_p.pdf", dpi=300, bbox_inches="tight")
+    plt.savefig("./supplement_figs/fs06_bias_lue.png", dpi=300, bbox_inches="tight")
+    plt.savefig("./supplement_figs/fs06_bias_lue.pdf", dpi=300, bbox_inches="tight")
     plt.close("all")
 
     df_bias = pd.DataFrame([hr_bias_dict, yy_bias_dict])
@@ -807,9 +1057,13 @@ def plot_fig_main(result_paths):
         corr_hr_g02,
         corr_hr_g03,
         corr_hr_g04,
+        corr_hr_g05,
+        corr_hr_g06,
+        corr_hr_g07,
+        corr_hr_g08,
         corr_hr_syr,
         corr_hr_dt_nt,
-        r"(a) P$^{\text{W}}_{\text{hr}}$ model - hourly",
+        r"(a) Bao$_{\text{hr}}$ model - hourly",
         "corr_coeff",
     )
 
@@ -819,9 +1073,13 @@ def plot_fig_main(result_paths):
         corr_yy_g02,
         corr_yy_g03,
         corr_yy_g04,
+        corr_yy_g05,
+        corr_yy_g06,
+        corr_yy_g07,
+        corr_yy_g08,
         corr_yy_syr,
         corr_yy_dt_nt,
-        r"(b) P$^{\text{W}}_{\text{hr}}$ model - annual",
+        r"(b) Bao$_{\text{hr}}$ model - annual",
         "corr_coeff",
     )
 
@@ -834,13 +1092,13 @@ def plot_fig_main(result_paths):
         loc="lower center",
         ncol=2,
         frameon=True,
-        bbox_to_anchor=(-0.1, -0.5),
+        bbox_to_anchor=(-0.1, -0.63),
     )
 
     fig_path = Path("supplement_figs")
     os.makedirs(fig_path, exist_ok=True)
-    plt.savefig("./supplement_figs/fs03_corr_p.png", dpi=300, bbox_inches="tight")
-    plt.savefig("./supplement_figs/fs03_corr_p.pdf", dpi=300, bbox_inches="tight")
+    plt.savefig("./supplement_figs/fs07_corr_lue.png", dpi=300, bbox_inches="tight")
+    plt.savefig("./supplement_figs/fs07_corr_lue.pdf", dpi=300, bbox_inches="tight")
     plt.close("all")
 
     df_corr = pd.DataFrame([hr_corr_dict, yy_corr_dict])
@@ -865,9 +1123,13 @@ def plot_fig_main(result_paths):
         variability_hr_g02,
         variability_hr_g03,
         variability_hr_g04,
+        variability_hr_g05,
+        variability_hr_g06,
+        variability_hr_g07,
+        variability_hr_g08,
         variability_hr_syr,
         variability_hr_dt_nt,
-        r"(a) P$^{\text{W}}_{\text{hr}}$ model - hourly",
+        r"(a) Bao$_{\text{hr}}$ model - hourly",
         "variability",
     )
 
@@ -877,9 +1139,13 @@ def plot_fig_main(result_paths):
         variability_yy_g02,
         variability_yy_g03,
         variability_yy_g04,
+        variability_yy_g05,
+        variability_yy_g06,
+        variability_yy_g07,
+        variability_yy_g08,
         variability_yy_syr,
         variability_yy_dt_nt,
-        r"(b) P$^{\text{W}}_{\text{hr}}$ model - annual",
+        r"(b) Bao$_{\text{hr}}$ model - annual",
         "variability",
     )
 
@@ -892,16 +1158,16 @@ def plot_fig_main(result_paths):
         loc="lower center",
         ncol=2,
         frameon=True,
-        bbox_to_anchor=(-0.1, -0.5),
+        bbox_to_anchor=(-0.1, -0.63),
     )
 
     fig_path = Path("supplement_figs")
     os.makedirs(fig_path, exist_ok=True)
     plt.savefig(
-        "./supplement_figs/fs04_variability_p.png", dpi=300, bbox_inches="tight"
+        "./supplement_figs/fs08_variability_lue.png", dpi=300, bbox_inches="tight"
     )
     plt.savefig(
-        "./supplement_figs/fs04_variability_p.pdf", dpi=300, bbox_inches="tight"
+        "./supplement_figs/fs08_variability_lue.pdf", dpi=300, bbox_inches="tight"
     )
     plt.close("all")
 
