@@ -1,10 +1,6 @@
-# Inter–annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production
+# Inter–annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production
 <p align="center">
   <img src=https://raw.githubusercontent.com/de-ranit/GPP-ModelParamVariation/refs/heads/main/prep_figs/figures/f01_workflow.png alt="workflow" width="600">
-</p>
-
-<p align="center">
-  Created in BioRender. De, R. (2025) <a href=https://BioRender.com/p76u899>https://BioRender.com/p76u899</a>
 </p>
 
 <p align="center">
@@ -12,40 +8,34 @@
     <img alt="ZenodoDOI" src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.15089289-blue?logo=Zenodo&logoColor=white&logoSize=auto"
   ></a>
 
-  <a href="https://doi.org/10.22541/essoar.174349993.30198378/v1">
-    <img alt="PreprintDOI" src="https://img.shields.io/badge/Preprint_DOI-10.22541%2Fessoar.174349993.30198378%2Fv1-blue"
+  <a href="https://doi.org/10.22541/essoar.174349993.30198378/v2">
+    <img alt="PreprintDOI" src="https://img.shields.io/badge/Preprint_DOI-10.22541%2Fessoar.174349993.30198378%2Fv2-blue"
   ></a>
 </p>
 
 # Description
 This repository contains codes to perform analysis and reproduce figures of our research paper:
 
-```
-De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2025). Inter–annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production, ESS Open Archive, 1–38, https://doi.org/10.22541/essoar.174349993.30198378/v1
-```
+> De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2026). Inter–annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production, ESS Open Archive, https://doi.org/10.22541/essoar.174349993.30198378/v2
+
 
 This paper is a companion paper or the second part of our previous study. Further details on our methodology/ description of models can be found at:
-```
-De, R., Bao, S., Koirala, S., Brenning, A., Reichstein, M., Tagesson, T., Liddell, M., Ibrom, A., Wolf, S., Šigut, L., Hörtnagl, L., Woodgate, W., Korkiakoski, M., Merbold, L., Black, T. A., Roland, M., Klosterhalfen, A., Blanken, P. D., Knox, S., Sabbatini, S., Gielen, B., Montagnani, L., Fensholt, R., Wohlfahrt, G., Desai, A. R., Paul-Limoges, E., Galvagno, M., Hammerle, A., Jocher, G., Ruiz Reverter, B., Holl, D., Chen, J., Vitale, L., Arain, M. A., and Carvalhais, N. (2025). Addressing Challenges in Simulating Inter–annual Variability of Gross
-Primary Production, ESS Open Archive, 1–75, https://doi.org/10.22541/essoar.172656939.93739740/v2
-```
+> De, R., Bao, S., Koirala, S., Brenning, A., Reichstein, M., Tagesson, T., Liddell, M., Ibrom, A., Wolf, S., Šigut, L., Hörtnagl, L., Woodgate, W., Korkiakoski, M., Merbold, L., Black, T. A., Roland, M., Klosterhalfen, A., Blanken, P. D., Knox, S., Sabbatini, S., Gielen, B., Montagnani, L., Fensholt, R., Wohlfahrt, G., Desai, A. R., Paul-Limoges, E., Galvagno, M., Hammerle, A., Jocher, G., Ruiz Reverter, B., Holl, D., Chen, J., Vitale, L., Arain, M. A., and Carvalhais, N. (2025). Addressing Challenges in Simulating Inter–annual Variability of Gross
+Primary Production. Journal of Advances in Modeling Earth Systems, 17(5), e2024MS004697. https://doi.org/10.1029/2024MS004697
+
 
 We used broadly the following two models in our study. It is highly recommended to get acquainted with the following two research papers before using our codes.
 
 1. Optimality-based model: P-model of Mengoli
-```
-Mengoli, G., Agustí-Panareda, A., Boussetta, S., Harrison, S. P., Trotta, C., and Prentice, I. C. (2022). Ecosystem photosynthesis in
+> Mengoli, G., Agustí-Panareda, A., Boussetta, S., Harrison, S. P., Trotta, C., and Prentice, I. C. (2022). Ecosystem photosynthesis in
 land-surface models: A first-principles approach incorporating acclimation, Journal of Advances in Modeling Earth Systems, 14,
 https://doi.org/10.1029/2021MS002767
-```
 
 2. Semi-empirical model: Bao model
-```
-Bao, S., Wutzler, T., Koirala, S., Cuntz, M., Ibrom, A., Besnard, S., Walther, S., Šigut, L., Moreno, A., Weber, U., Wohlfahrt,695
+> Bao, S., Wutzler, T., Koirala, S., Cuntz, M., Ibrom, A., Besnard, S., Walther, S., Šigut, L., Moreno, A., Weber, U., Wohlfahrt,695
 G., Cleverly, J., Migliavacca, M., Woodgate, W., Merbold, L., Veenendaal, E., and Carvalhais, N. (2022). Environment-sensitivity
 functions for gross primary productivity in light use efficiency models, Agricultural and Forest Meteorology, 312, 108 708,
 https://doi.org/10.1016/j.agrformet.2021.108708
-```
 
 
 # Disclaimer
@@ -57,6 +47,7 @@ The codes are written to be compatible with computing platforms and filestructur
 # Structure 
 - `site_info`: This folder contains two `.csv` files: (1) `SiteInfo_BRKsite_list.csv`, this one is necessary so that the code knows data for which all sites are available and can access site specific metadata for preparing results, such as data analysis and grouping of sites according to site characteristics, (2) `site_year_list.csv` lists all the site–years available for site–year specific optimization. This list also contains site–years which are not of good quality, and later gets excluded during data processing steps.
 - `src`: This folder basically contains all source codes. It has four folders: (1) `common` folder contains all the scripts which are common for both the Optimality-based (P-model and its variations) and the semi-empirical model (Bao model and its variations), (2) `lue_model` contains model codes and cost function specific to the semi-empirical model (Bao model and its variations), (3) `p_model` contains model codes and cost function specific to the Optimality-based (P-model and its variations), and (4) `postprocess` contains all the scripts to prepare exploratory plots after parameterization and forward runs.
+- `optimize_lbgfs`: This folder contains the code to further constrain model parameters obtained from CMA-ES (with a big population size) by using a gradient-based optimizer (L-BFGS-B).
 - `prep_figs`: This folder contains all the scripts to reproduce the figures which are presented in our research paper and its supplementary document. All modelling experiments and their relevant data must be available to reproduce the figures and their relative paths should be correctly mentioned at `result_path_coll.py`.
 
 
@@ -70,42 +61,44 @@ The codes are written to be compatible with computing platforms and filestructur
 **Research paper:**
   - BibTeX
 ```
-@article{De_2025_paramval,
+@article{De_2026_paramval,
 author = {De, R. and Brenning, A. and Reichstein, M. and Šigut, L. and Ruiz Reverter, B. and Korkiakoski, M. and Paul-Limoges, E. and Blanken, P. D. and Black, T. A. and Gielen, B. and Tagesson, T. and Wohlfahrt, G. and Montagnani, L. and Wolf, S. and Chen, J. and Liddell, M. and Desai, A. R. and Koirala, S. and Carvalhais, N.},
-doi = {10.22541/essoar.174349993.30198378/v1},
+doi = {10.22541/essoar.174349993.30198378/v2},
 journal = {ESS Open Archive},
 note = {preprint},
-title = {{Inter--annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production}},
-url = {https://essopenarchive.org/doi/full/10.22541/essoar.174349993.30198378/v1},
-month = {apr},
-year = {2025}
+title = {{Inter--annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production}},
+url = {https://essopenarchive.org/doi/full/10.22541/essoar.174349993.30198378/v2},
+month = {jan},
+year = {2026}
 }
 ```
   - APA
-```
-De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2025). Inter–annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production, ESS Open Archive, 1–38, https://doi.org/10.22541/essoar.174349993.30198378/v1
-```
+> De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2026). Inter–annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production, ESS Open Archive, https://doi.org/10.22541/essoar.174349993.30198378/v2
 
 **This repository:**
   - BibTeX
 ```
-@software{de2025codes_param,
+@software{de2026codes_param,
 author = {De, Ranit},
-title = {{Scripts for analyses presented in ``Inter--annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production''}},
-month = apr,
-year = 2025,
+title = {{Scripts for analyses presented in ``Inter--annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production''}},
+month = jan,
+year = 2026,
 publisher = {Zenodo},
-note = {v1.1-preprint},
+note = {v1.2-preprint},
 doi = {10.5281/zenodo.15089289},
 URL = {https://github.com/de-ranit/GPP-ModelParamVariation}
 }
 ```
   - APA
-```
-De, R. (2025). Scripts for analyses presented in “Inter–annual Variability of Hydrological Parameters Improves Simulation of Annual Gross Primary Production” (v1.1-preprint). Zenodo. https://doi.org/10.5281/zenodo.15089289
-```
+> De, R. (2026). Scripts for analyses presented in “Inter–annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production” (v1.2-preprint). Zenodo. https://doi.org/10.5281/zenodo.15089289
+
 
 # Change Log:
+**v1.2-preprint**
+- CMA-ES optimization with default hyperparameters
+- optimize with L-BFGS-B starting from CMA-ES with big population size
+- additional analyses and updating figures
+
 **v1.1-preprint**
 - Contains code for model optimization in which a group of parameters were varied per year, while other parameters remain fixed.
 
