@@ -16,7 +16,7 @@
 # Description
 This repository contains codes to perform analysis and reproduce figures of our research paper:
 
-> De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2026). Inter–annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production. *Journal of Advances in Modeling Earth Systems*, 18(6), e2025MS005116. https://doi.org/10.1029/2025MS005116
+> De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2026). Inter–Annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production. *Journal of Advances in Modeling Earth Systems*, 18(6), e2025MS005116. https://doi.org/10.1029/2025MS005116
 
 
 This paper is a companion paper or the second part of our previous study. Further details on our methodology/ description of models can be found at:
@@ -72,14 +72,14 @@ year = {2026}
 }
 ```
   - APA
-> De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2026). Inter–annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production. *Journal of Advances in Modeling Earth Systems*, 18(6), e2025MS005116. https://doi.org/10.1029/2025MS005116
+> De, R., Brenning, A., Reichstein, M., Šigut, L., Ruiz Reverter, B., Korkiakoski, M., Paul-Limoges, E., Blanken, P. D., Black, T. A., Gielen, B., Tagesson, T., Wohlfahrt, G., Montagnani, L., Wolf, S., Chen, J., Liddell, M., Desai, A. R., Koirala, S. and Carvalhais, N. (2026). Inter–Annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production. *Journal of Advances in Modeling Earth Systems*, 18(6), e2025MS005116. https://doi.org/10.1029/2025MS005116
 
 **This repository:**
   - BibTeX
 ```
 @software{de2026codes_param,
 author = {De, Ranit},
-title = {{Scripts for analyses presented in ``Inter--annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production''}},
+title = {{Scripts for analyses presented in ``Inter--Annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production''}},
 month = jun,
 year = 2026,
 publisher = {Zenodo},
@@ -89,7 +89,7 @@ URL = {https://github.com/de-ranit/GPP-ModelParamVariation}
 }
 ```
   - APA
-> De, R. (2026). Scripts for analyses presented in “Inter–annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production” (v1.3-published). *Zenodo*. https://doi.org/10.5281/zenodo.15089289
+> De, R. (2026). Scripts for analyses presented in “Inter–Annual Variability of Model Parameters Improves Simulation of Annual Gross Primary Production” (v1.3-published). *Zenodo*. https://doi.org/10.5281/zenodo.15089289
 
 
 # Change Log:
