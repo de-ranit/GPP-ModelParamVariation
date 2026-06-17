@@ -96,6 +96,7 @@ URL = {https://github.com/de-ranit/GPP-ModelParamVariation}
 **v1.3-published**
 - updated readme with correct references after publication of our article
 - no changes in actual code
+
 **v1.2-preprint**
 - CMA-ES optimization with default hyperparameters
 - optimize with L-BFGS-B starting from CMA-ES with big population size
