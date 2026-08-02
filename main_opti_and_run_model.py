@@ -9,15 +9,16 @@ author: rde
 first created: 2023-11-07
 """
 
+import glob
 import json
-from pathlib import Path
-import sys
 import logging
 import logging.config
-import glob
-from multiprocessing.pool import Pool
-from functools import partial
 import os
+import sys
+from functools import partial
+from multiprocessing.pool import Pool
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -26,12 +27,17 @@ sys.path.append(str(ROOT_PATH / "src"))  # type: ignore # Add path for other sci
 
 # don't format the following lines
 # fmt: off
+from src.common.forward_run_model import (
+    forward_run_model,  # pylint: disable=C0413
+    save_n_plot_model_results,  # pylint: disable=C0413
+)
 from src.common.get_data import get_data  # pylint: disable=C0413
-from src.common.opti_per_site_or_site_year import optimize_model  # pylint: disable=C0413
-from src.common.opti_per_site_or_site_year import get_cmaes_options  # pylint: disable=C0413
-from src.common.forward_run_model import forward_run_model  # pylint: disable=C0413
-from src.common.forward_run_model import save_n_plot_model_results # pylint: disable=C0413
-from src.postprocess.plot_exp_result import plot_exp_result # pylint: disable=C0413
+from src.common.opti_per_site_or_site_year import (
+    get_cmaes_options,  # pylint: disable=C0413
+    optimize_model,  # pylint: disable=C0413
+)
+from src.postprocess.plot_exp_result import plot_exp_result  # pylint: disable=C0413
+
 # fmt: on
 
 
@@ -240,7 +246,7 @@ def main_script_forward(idx, site_list, settings_dict):
         xbest = opti_dict["xbest"]  # get the optimized parameters for the site
 
         if (xbest is None) or (
-            np.isnan(np.array(xbest)).any()
+            np.all(np.isnan(xbest))
         ):  # if the optimization was not successful, skip the site
             logger.warning(
                 "%s : optimization was not successful (skipping forward run)",
